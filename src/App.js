@@ -295,7 +295,9 @@ function App() {
       />
 
       <RecordList records={records} onEdit={editRecord} onDelete={deleteRecord} onConfirm={confirmRecord} />
-
+      {isMobile && (
+        <button className="fab-add" onClick={() => setModal({ type: 'create' })} aria-label="Создать запись">➕ Создать запись</button>
+      )}
         {modal && modal.type === 'edit' && (
           <Modal title="Редактировать запись" onCancel={closeModal} onConfirm={() => handleModalConfirm(modal.formData)} confirmLabel="Сохранить">
             <EditForm initial={modal.record} onChange={(fd) => { modal.formData = fd; }} />
