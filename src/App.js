@@ -9,7 +9,7 @@ import ConfirmForm from './components/ConfirmForm';
 import ThemeToggle from './components/ThemeToggle';
 import { getRecordCards } from './service/api';
 
-function Navigation({ onOpenCreate, onToggleDisco, discoMode, showDiscoButton }) {
+function Navigation({ onOpenCreate, onToggleDisco, discoMode, showDiscoButton, isMobile }) {
   return (
     <nav>
       <div className="nav-left">
@@ -22,7 +22,6 @@ function Navigation({ onOpenCreate, onToggleDisco, discoMode, showDiscoButton })
     </nav>
   );
 }
-
 
 function App() {
   // helper: нормализовать статус платежа в каноничные значения
@@ -60,9 +59,26 @@ function App() {
 
   const [discoMode, setDiscoMode] = useState(false);
   const [showDiscoButton, setShowDiscoButton] = useState(false);
-  const [tapCount, setTapCount] = useState(0);
   const [swipeStart, setSwipeStart] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
+  const [longPressTimer, setLongPressTimer] = useState(null);
+
+  // детекция мобильного устройства
+  useEffect(() => {
+    const checkMobile = () => {
+      const userAgent = navigator.userAgent.toLowerCase();
+      const mobileKeywords = ['mobile', 'android', 'iphone', 'ipad', 'tablet', 'blackberry', 'windows phone'];
+      const isMobileDevice = mobileKeywords.some(keyword => userAgent.includes(keyword)) || 
+                           window.innerWidth <= 768 ||
+                           ('ontouchstart' in window) ||
+                           (navigator.maxTouchPoints > 0);
+      setIsMobile(isMobileDevice);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // загрузка remote JSON и дополнение state новыми записями (не перезаписываем локальные данные)
   useEffect(() => {
@@ -110,9 +126,69 @@ function App() {
       }
     };
 
+    const handleTouchStart = (e) => {
+      if (isMobile && e.touches.length === 1) {
+        const touch = e.touches[0];
+        
+        // Длинное нажатие на логотип (верхняя часть экрана) для активации
+        if (touch.clientY < 100) {
+          const timer = setTimeout(() => {
+            setShowDiscoButton(prev => !prev);
+          }, 1000); // 1 секунда длинного нажатия
+          
+          setLongPressTimer(timer);
+        }
+      }
+    };
+
+    const handleTouchEnd = (e) => {
+      if (isMobile && e.changedTouches.length === 1) {
+        // Отменяем длинное нажатие если пользователь отпустил палец раньше времени
+        if (longPressTimer) {
+          clearTimeout(longPressTimer);
+          setLongPressTimer(null);
+        }
+        
+        // Обрабатываем свайп только если он начался в верхней части экрана
+        if (swipeStart > 0) {
+          const touch = e.changedTouches[0];
+          // Проверяем, что свайп начался в верхней части (область навигации)
+          if (touch.clientY < 150) {
+            const swipeDistance = touch.clientX - swipeStart;
+            const swipeThreshold = 100; // Минимальное расстояние для свайпа
+            
+            if (Math.abs(swipeDistance) > swipeThreshold) {
+              // Свайп влево или вправо активирует кнопку диско
+              setShowDiscoButton(prev => !prev);
+            }
+          }
+          setSwipeStart(0);
+        }
+      }
+    };
+
+    const handleTouchMove = (e) => {
+      if (isMobile && e.touches.length === 1) {
+        const touch = e.touches[0];
+        // Свайп работает только в верхней части экрана (область навигации)
+        if (swipeStart === 0 && touch.clientY < 150) {
+          setSwipeStart(touch.clientX);
+        }
+      }
+    };
+
     document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, []);
+    document.addEventListener('touchstart', handleTouchStart, { passive: true });
+    document.addEventListener('touchmove', handleTouchMove, { passive: true });
+    document.addEventListener('touchend', handleTouchEnd, { passive: true });
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('touchstart', handleTouchStart);
+      document.removeEventListener('touchmove', handleTouchMove);
+      document.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [isMobile, swipeStart, longPressTimer]);
 
   // сохраняем в localStorage при изменении state — используем сравнение чтобы меньше перезаписывать
   useEffect(() => {
@@ -210,7 +286,13 @@ function App() {
 
   return (
     <div className="app-container">
-      <Navigation onOpenCreate={() => setModal({ type: 'create' })} onToggleDisco={() => setDiscoMode(!discoMode)} discoMode={discoMode} showDiscoButton={showDiscoButton} />
+      <Navigation 
+        onOpenCreate={() => setModal({ type: 'create' })} 
+        onToggleDisco={() => setDiscoMode(!discoMode)} 
+        discoMode={discoMode} 
+        showDiscoButton={showDiscoButton} 
+        isMobile={isMobile} 
+      />
 
       <RecordList records={records} onEdit={editRecord} onDelete={deleteRecord} onConfirm={confirmRecord} />
 
