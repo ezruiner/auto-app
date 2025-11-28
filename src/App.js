@@ -60,6 +60,9 @@ function App() {
 
   const [discoMode, setDiscoMode] = useState(false);
   const [showDiscoButton, setShowDiscoButton] = useState(false);
+  const [tapCount, setTapCount] = useState(0);
+  const [swipeStart, setSwipeStart] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
 
   // загрузка remote JSON и дополнение state новыми записями (не перезаписываем локальные данные)
   useEffect(() => {
