@@ -23,6 +23,19 @@ function Navigation({ onOpenCreate, onToggleDisco, discoMode, showDiscoButton, i
   );
 }
 
+function MobileControls({ onToggleDisco, discoMode, showDiscoButton }) {
+  return (
+    <div className="mobile-controls">
+      {showDiscoButton && (
+        <button className="disco-btn" onClick={onToggleDisco}>
+          {discoMode ? '🎉 Диско ВКЛ' : '🎈 Диско'}
+        </button>
+      )}
+      <ThemeToggle />
+    </div>
+  );
+}
+
 function App() {
   // helper: нормализовать статус платежа в каноничные значения
   const normalizeStatus = (s) => {
@@ -130,8 +143,12 @@ function App() {
       if (isMobile && e.touches.length === 1) {
         const touch = e.touches[0];
         
-        // Длинное нажатие на логотип (верхняя часть экрана) для активации
-        if (touch.clientY < 100) {
+        // Получаем элемент с заголовком списка
+        const listHeader = document.querySelector('.list-header');
+        const headerBottom = listHeader ? listHeader.getBoundingClientRect().bottom : 100;
+         
+        // Длинное нажатие в области до кнопок фильтрации для активации
+        if (touch.clientY < headerBottom) {
           const timer = setTimeout(() => {
             setShowDiscoButton(prev => !prev);
           }, 1000); // 1 секунда длинного нажатия
@@ -149,11 +166,14 @@ function App() {
           setLongPressTimer(null);
         }
         
-        // Обрабатываем свайп только если он начался в верхней части экрана
+        // Обрабатываем свайп только если он начался в области до кнопок фильтрации
         if (swipeStart > 0) {
           const touch = e.changedTouches[0];
-          // Проверяем, что свайп начался в верхней части (область навигации)
-          if (touch.clientY < 150) {
+          // Получаем элемент с заголовком списка
+          const listHeader = document.querySelector('.list-header');
+          const headerBottom = listHeader ? listHeader.getBoundingClientRect().bottom : 150;
+          // Проверяем, что свайп начался в области до кнопок фильтрации
+          if (touch.clientY < headerBottom) {
             const swipeDistance = touch.clientX - swipeStart;
             const swipeThreshold = 100; // Минимальное расстояние для свайпа
             
@@ -170,9 +190,14 @@ function App() {
     const handleTouchMove = (e) => {
       if (isMobile && e.touches.length === 1) {
         const touch = e.touches[0];
-        // Свайп работает только в верхней части экрана (область навигации)
-        if (swipeStart === 0 && touch.clientY < 150) {
-          setSwipeStart(touch.clientX);
+        // Свайп работает только в области до кнопок фильтрации
+        if (swipeStart === 0) {
+          // Получаем элемент с заголовком списка
+          const listHeader = document.querySelector('.list-header');
+          const headerBottom = listHeader ? listHeader.getBoundingClientRect().bottom : 150;
+          if (touch.clientY < headerBottom) {
+            setSwipeStart(touch.clientX);
+          }
         }
       }
     };
@@ -290,11 +315,21 @@ function App() {
         onOpenCreate={() => setModal({ type: 'create' })} 
         onToggleDisco={() => setDiscoMode(!discoMode)} 
         discoMode={discoMode} 
-        showDiscoButton={showDiscoButton} 
+        showDiscoButton={!isMobile && showDiscoButton} 
         isMobile={isMobile} 
       />
 
-      <RecordList records={records} onEdit={editRecord} onDelete={deleteRecord} onConfirm={confirmRecord} />
+      {isMobile && (
+        <MobileControls 
+          onToggleDisco={() => setDiscoMode(!discoMode)} 
+          discoMode={discoMode} 
+          showDiscoButton={showDiscoButton} 
+        />
+      )}
+
+      <div className="records-area">
+        <RecordList records={records} onEdit={editRecord} onDelete={deleteRecord} onConfirm={confirmRecord} />
+      </div>
       {isMobile && (
         <button className="fab-add" onClick={() => setModal({ type: 'create' })} aria-label="Создать запись">➕ Создать запись</button>
       )}

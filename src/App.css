@@ -130,6 +130,9 @@ nav a:hover, nav button:hover {
   font-weight: 500;
   transition: all 0.2s ease;
   white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  touch-action: manipulation;
 }
 
 .btn:hover {
@@ -137,6 +140,15 @@ nav a:hover, nav button:hover {
   border-color: #b0b0b0;
 }
 
+.btn.active {
+  background: #0066cc;
+  color: white;
+  border-color: #0066cc;
+  box-shadow: var(--shadow);
+}
+
+/* Ensure active-class styling persists on touch devices */
+.btn.active:active,
 .btn.active {
   background: #0066cc;
   color: white;
@@ -604,27 +616,60 @@ body.dark-theme .cancel-reason {
 }
 
 @media (max-width: 768px) {
-  /* hide left-side navigation actions on mobile (we will show FAB instead) */
-  nav .nav-left {
+  /* Полностью скрыть старую навигацию на мобильных */
+  nav {
     display: none;
   }
 
-  /* keep only theme-toggle visible in nav-right; hide other buttons */
-  nav .nav-right .btn:not(.theme-toggle) {
-    display: none;
-  }
-
-  /* Fix theme toggle to top-right on mobile for easy access */
-  .theme-toggle {
+  /* Создать новую мобильную панель с кнопками диско и темы */
+  .mobile-controls {
     position: fixed;
     top: 12px;
     right: 12px;
     z-index: 3000;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .disco-btn {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    padding: 8px 12px;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    font-size: 14px;
+    cursor: pointer;
+    touch-action: manipulation;
+    color: var(--text-primary);
+    font-weight: 500;
+    transition: all 0.2s ease;
+  }
+
+  .disco-btn:hover {
+    background: var(--bg-secondary);
+    transform: scale(1.05);
+  }
+
+  .disco-btn:active {
+    transform: scale(0.98);
+  }
+
+  .theme-toggle {
     background: var(--bg-primary);
     border: 1px solid var(--border-color);
     padding: 8px 10px;
-    border-radius: 10px;
+    border-radius: 8px;
     box-shadow: var(--shadow);
+    font-size: 16px;
+    cursor: pointer;
+    touch-action: manipulation;
+    color: var(--text-primary);
+  }
+
+  .theme-toggle:hover {
+    background: var(--bg-secondary);
+    transform: scale(1.05);
   }
 
   /* show the FAB centered at the bottom */
@@ -652,6 +697,11 @@ body.dark-theme .cancel-reason {
 
   .fab-add:active {
     transform: translateX(-50%) scale(0.98);
+  }
+
+  /* Добавить отступ внизу списка, чтобы кнопка FAB не перекрывала карточки */
+  .records-area {
+    padding-bottom: 50px;
   }
 
 }
@@ -693,8 +743,9 @@ body.dark-theme .cancel-reason {
   background: #999;
 }
 
-/* === Disco Mode === */
-.disco * {
+/* === Disco Mode (scope animation only to records area to avoid breaking fixed elements) === */
+.disco .records-area,
+.disco .records-area * {
   animation: rainbow 3s linear infinite;
 }
 
