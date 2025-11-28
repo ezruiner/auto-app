@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import ResultCreateRecord from './ResultCreateRecord';
 
 export default function CreateCard({ onAdd, onClose }) {
@@ -13,7 +12,6 @@ export default function CreateCard({ onAdd, onClose }) {
   });
 
   const [result, setResult] = useState('');
-  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -33,8 +31,6 @@ export default function CreateCard({ onAdd, onClose }) {
     // Если форма используется внутри модального окна — закроем модал
     if (onClose) {
       onClose();
-    } else {
-      navigate('/records');
     }
   };
 
