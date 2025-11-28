@@ -7,14 +7,12 @@ import EditForm from './components/EditForm';
 import DeleteForm from './components/DeleteForm';
 import ConfirmForm from './components/ConfirmForm';
 import ThemeToggle from './components/ThemeToggle';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { getRecordCards } from './service/api';
 
 function Navigation({ onOpenCreate, onToggleDisco, discoMode, showDiscoButton }) {
   return (
     <nav>
       <div className="nav-left">
-        <Link to="/records">📋 Список записей</Link>
         <button className="btn" onClick={() => onOpenCreate()}>➕ Создать запись</button>
       </div>
       <div className="nav-right">
@@ -94,7 +92,6 @@ function App() {
     return () => { mounted = false };
   }, []);
 
-  // Konami code для показа/скрытия кнопки disco
   const konamiCode = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65];
   let keySequence = [];
 
@@ -209,14 +206,10 @@ function App() {
   }, [discoMode]);
 
   return (
-    <Router>
-      <div className="app-container">
-        <Navigation onOpenCreate={() => setModal({ type: 'create' })} onToggleDisco={() => setDiscoMode(!discoMode)} discoMode={discoMode} showDiscoButton={showDiscoButton} />
+    <div className="app-container">
+      <Navigation onOpenCreate={() => setModal({ type: 'create' })} onToggleDisco={() => setDiscoMode(!discoMode)} discoMode={discoMode} showDiscoButton={showDiscoButton} />
 
-        <Routes>
-          <Route path="/records" element={<RecordList records={records} onEdit={editRecord} onDelete={deleteRecord} onConfirm={confirmRecord} />} />
-          <Route path="/create" element={<CreateCard onAdd={addRecord} />} />
-        </Routes>
+      <RecordList records={records} onEdit={editRecord} onDelete={deleteRecord} onConfirm={confirmRecord} />
 
         {modal && modal.type === 'edit' && (
           <Modal title="Редактировать запись" onCancel={closeModal} onConfirm={() => handleModalConfirm(modal.formData)} confirmLabel="Сохранить">
@@ -241,8 +234,7 @@ function App() {
             <CreateCard onAdd={(fd) => { addRecord(fd); closeModal(); }} onClose={closeModal} />
           </Modal>
         )}
-      </div>
-    </Router>
+    </div>
   );
 }
 
