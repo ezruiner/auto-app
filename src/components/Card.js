@@ -1,3 +1,11 @@
+// Функция для форматирования числа с разделением точками каждую тысячу
+const formatPrice = (amount) => {
+  if (amount == null || amount === '') return '';
+  const num = typeof amount === 'string' ? parseFloat(amount.replace(/[^\d.-]/g, '')) : Number(amount);
+  if (isNaN(num)) return amount;
+  return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+};
+
 export default function Card({ id, client, car, service, price, date, payment_status, payment_amount, payment_comment, cancel_reason, cancelledAt, onEdit, onDelete, onConfirm }) {
   const status = (payment_status || '').toLowerCase();
 
@@ -26,10 +34,10 @@ export default function Card({ id, client, car, service, price, date, payment_st
         <p><span className="label">Автомобиль:</span> {car}</p>
         <p><span className="label">Услуга:</span> {service}</p>
         <p><span className="label">Дата:</span> {date}</p>
-        <p><span className="label">К оплате:</span> <strong>{price} ₽</strong></p>
+        <p><span className="label">К оплате:</span> <strong>{formatPrice(price)} ₽</strong></p>
         {payment_status === 'completed' && (
           <>
-            <p><span className="label">Оплачено:</span> <strong>{payment_amount != null ? payment_amount : price} ₽</strong></p>
+            <p><span className="label">Оплачено:</span> <strong>{formatPrice(payment_amount != null ? payment_amount : price)} ₽</strong></p>
             {payment_comment && <p><span className="label">Комментарий:</span> {payment_comment}</p>}
           </>
         )}
@@ -42,13 +50,13 @@ export default function Card({ id, client, car, service, price, date, payment_st
       </div>
       <div className="card-actions">
         <button className="btn btn.small" onClick={() => onEdit && onEdit(id)}>✏️ Редактировать</button>
-        <button 
-          className="btn btn.small danger" 
+        <button
+          className="btn btn.small danger"
           onClick={() => onDelete && onDelete(id)}
           disabled={cls === 'cancelled'}
         >🗑️ Удалить</button>
-        <button 
-          className="btn btn.small primary" 
+        <button
+          className="btn btn.small primary"
           onClick={() => onConfirm && onConfirm(id)}
           disabled={cls !== 'in-progress'}
         >✓ Подтвердить</button>
