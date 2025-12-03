@@ -1,5 +1,6 @@
 import './App.css';
 import { useEffect, useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 import RecordList from './components/RecordList';
 import CreateCard from  './components/RecordForm';
 import Modal from './components/Modal';
@@ -7,13 +8,16 @@ import EditForm from './components/EditForm';
 import DeleteForm from './components/DeleteForm';
 import ConfirmForm from './components/ConfirmForm';
 import ThemeToggle from './components/ThemeToggle';
+import AdminPanel from './components/AdminPanel';
 import { getRecordCards } from './service/api';
 
 function Navigation({ onOpenCreate, onToggleDisco, discoMode, showDiscoButton, isMobile }) {
   return (
     <nav>
       <div className="nav-left">
+        <Link to="/records" className="btn">📋 Список записей</Link>
         <button className="btn" onClick={() => onOpenCreate()}>➕ Создать запись</button>
+        <Link to="/admin" className="btn">⚙️ Администратор</Link>
       </div>
       <div className="nav-right">
         {showDiscoButton && <button className="btn" onClick={onToggleDisco}>{discoMode ? '🎉 Диско ВКЛ' : '🎈 Диско'}</button>}
@@ -23,12 +27,15 @@ function Navigation({ onOpenCreate, onToggleDisco, discoMode, showDiscoButton, i
   );
 }
 
-function MobileControls({ onToggleDisco, discoMode, showDiscoButton }) {
+function MobileControls({ onToggleDisco, discoMode, showDiscoButton, onOpenCreate }) {
   return (
-    <div className="mobile-controls">
+    <div className="mobile-bottom-group" role="navigation" aria-label="Mobile navigation">
+      <Link to="/records" className="mbg-btn">📋 Список</Link>
+      <button type="button" className="mbg-btn mbg-create" onClick={onOpenCreate}>➕ Создать запись</button>
+      <Link to="/admin" className="mbg-btn">⚙️ Админ</Link>
       {showDiscoButton && (
-        <button className="disco-btn" onClick={onToggleDisco}>
-          {discoMode ? '🎉 Диско ВКЛ' : '🎈 Диско'}
+        <button className="disco-btn mobile-inline" onClick={onToggleDisco}>
+          {discoMode ? '🎉' : '🎈'}
         </button>
       )}
       <ThemeToggle />
@@ -309,30 +316,69 @@ function App() {
     }
   }, [discoMode]);
 
-  return (
-    <div className="app-container">
-      <Navigation 
-        onOpenCreate={() => setModal({ type: 'create' })} 
-        onToggleDisco={() => setDiscoMode(!discoMode)} 
-        discoMode={discoMode} 
-        showDiscoButton={!isMobile && showDiscoButton} 
-        isMobile={isMobile} 
-      />
+  // Вложенный компонент, чтобы использовать `useLocation` внутри Router
+  function InnerApp() {
+    const location = useLocation();
+    const onRecordsRoute = location.pathname === '/' || location.pathname === '/records';
 
-      {isMobile && (
-        <MobileControls 
+    const clearCache = () => {
+      try {
+        if (!window.confirm('Очистить локальный кэш приложения? Это удалит локальные записи и настройки.')) return;
+        const keys = ['records','services','users','shifts','deletedRecords'];
+        keys.forEach(k => localStorage.removeItem(k));
+        // обновим видимые state
+        setRecords([]);
+        // небольшая перезагрузка интерфейса
+        window.location.reload();
+      } catch (err) {
+        console.warn('clearCache error', err);
+      }
+    };
+
+    return (
+      <div className="app-container">
+        <Navigation 
+          onOpenCreate={() => setModal({ type: 'create' })} 
           onToggleDisco={() => setDiscoMode(!discoMode)} 
           discoMode={discoMode} 
-          showDiscoButton={showDiscoButton} 
+          showDiscoButton={!isMobile && showDiscoButton} 
+          isMobile={isMobile} 
         />
-      )}
 
-      <div className="records-area">
-        <RecordList records={records} onEdit={editRecord} onDelete={deleteRecord} onConfirm={confirmRecord} />
-      </div>
-      {isMobile && (
-        <button className="fab-add" onClick={() => setModal({ type: 'create' })} aria-label="Создать запись">➕ Создать запись</button>
-      )}
+        {isMobile && (
+          <MobileControls 
+            onToggleDisco={() => setDiscoMode(!discoMode)} 
+            discoMode={discoMode} 
+            showDiscoButton={showDiscoButton}
+            onOpenCreate={() => setModal({ type: 'create' })}
+          />
+        )}
+
+        <Routes>
+          <Route path="/" element={
+            <div className="records-area">
+              <RecordList records={records} onEdit={editRecord} onDelete={deleteRecord} onConfirm={confirmRecord} />
+            </div>
+          } />
+          <Route path="/records" element={
+            <div className="records-area">
+              <RecordList records={records} onEdit={editRecord} onDelete={deleteRecord} onConfirm={confirmRecord} />
+            </div>
+          } />
+          <Route path="/admin" element={<AdminPanel />} />
+        </Routes>
+
+        {/* cache clear buttons: desktop bottom-right, mobile top-left when on records */}
+        {onRecordsRoute && !isMobile && (
+          <button className="cache-clear desktop" onClick={clearCache} title="Очистить кэш">🗑️ Очистить кэш</button>
+        )}
+        {onRecordsRoute && isMobile && (
+          <button className="cache-clear mobile" onClick={clearCache} title="Очистить кэш">🗑️</button>
+        )}
+
+        {isMobile && (
+          <button className="fab-add" onClick={() => setModal({ type: 'create' })} aria-label="Создать запись">➕ Создать запись</button>
+        )}
         {modal && modal.type === 'edit' && (
           <Modal title="Редактировать запись" onCancel={closeModal} onConfirm={() => handleModalConfirm(modal.formData)} confirmLabel="Сохранить">
             <EditForm initial={modal.record} onChange={(fd) => { modal.formData = fd; }} />
@@ -356,7 +402,14 @@ function App() {
             <CreateCard onAdd={(fd) => { addRecord(fd); closeModal(); }} onClose={closeModal} />
           </Modal>
         )}
-    </div>
+      </div>
+    );
+  }
+
+  return (
+    <Router>
+      <InnerApp />
+    </Router>
   );
 }
 

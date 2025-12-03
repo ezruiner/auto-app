@@ -60,7 +60,7 @@ nav {
 
 nav a, nav button {
   text-decoration: none;
-  color: #0066cc;
+  color: var(--text-primary);
   font-weight: 500;
   font-size: 17px;
   border: none;
@@ -68,12 +68,12 @@ nav a, nav button {
   cursor: pointer;
   padding: 8px 12px;
   border-radius: 6px;
-  transition: all 0.2s ease;
+  transition: background 0.15s ease, transform 0.08s ease;
 }
 
+/* Hover: only background change, keep text color stable */
 nav a:hover, nav button:hover {
   background: var(--bg-secondary);
-  color: #0052a3;
 }
 
 .nav-left {
@@ -132,6 +132,7 @@ nav a:hover, nav button:hover {
   white-space: nowrap;
   -webkit-tap-highlight-color: transparent;
   -webkit-user-select: none;
+  user-select: none;
   touch-action: manipulation;
 }
 
@@ -542,6 +543,66 @@ body.dark-theme .cancel-reason {
   transform: scale(0.98);
 }
 
+/* === Select Elements Styling === */
+select {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font-size: 16px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: border 0.2s ease, box-shadow 0.2s ease;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url('data:image/svg+xml;charset=UTF-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>');
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  background-size: 20px;
+  padding-right: 36px;
+}
+
+select:focus {
+  outline: none;
+  border-color: #0066cc;
+  box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+}
+
+select:disabled {
+  background-color: var(--bg-secondary);
+  color: var(--text-secondary);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* === Cache Clear Button Styling === */
+.cache-clear {
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: var(--shadow);
+  transition: all 0.2s ease;
+  touch-action: manipulation;
+}
+
+.cache-clear:hover {
+  background: var(--bg-secondary);
+  border-color: #0066cc;
+  box-shadow: var(--shadow-lg);
+}
+
+.cache-clear:active {
+  transform: scale(0.98);
+}
+
 /* === Empty State === */
 .empty-state {
   text-align: center;
@@ -621,6 +682,12 @@ body.dark-theme .cancel-reason {
     display: none;
   }
 
+  /* Показать новую нижнюю группу навигации */
+  .mobile-bottom-group { display: inline-flex; }
+
+  /* Скрыть старые верхние мобильные контролы, если они есть */
+  .mobile-controls { display: none; }
+
   /* Создать новую мобильную панель с кнопками диско и темы */
   .mobile-controls {
     position: fixed;
@@ -630,6 +697,71 @@ body.dark-theme .cancel-reason {
     display: flex;
     gap: 8px;
     align-items: center;
+  }
+
+  /* Mobile bottom grouped navigation */
+  .mobile-bottom-group {
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 14px;
+    z-index: 2600;
+    display: inline-flex;
+    align-items: center;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 999px;
+    box-shadow: var(--shadow-lg);
+    padding: 6px;
+    gap: 0;
+  }
+
+  .mbg-btn {
+    background: transparent;
+    border: none;
+    padding: 10px 16px;
+    font-size: 15px;
+    cursor: pointer;
+    color: var(--text-primary);
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .mbg-btn + .mbg-btn {
+    border-left: 1px solid rgba(128,128,128,0.12);
+  }
+
+  .mbg-create {
+    background: linear-gradient(90deg,#0066cc,#0052a3);
+    color: #fff;
+    border-radius: 999px;
+    margin: 0 6px;
+    box-shadow: var(--shadow);
+  }
+
+  /* cache clear button positions */
+  .cache-clear.desktop {
+    position: fixed;
+    right: 18px;
+    bottom: 18px;
+    z-index: 2500;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    padding: 8px 10px;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+  }
+
+  .cache-clear.mobile {
+    position: fixed;
+    left: 10px;
+    top: 10px;
+    z-index: 3001;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    padding: 8px 10px;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
   }
 
   .disco-btn {
@@ -672,6 +804,19 @@ body.dark-theme .cancel-reason {
     transform: scale(1.05);
   }
 
+  /* Theme toggle in mobile bottom group - no styling */
+  .mobile-bottom-group .theme-toggle {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 10px 12px;
+    font-size: 16px;
+  }
+
+  .mobile-bottom-group .theme-toggle:hover {
+    transform: none;
+  }
+
   /* show the FAB centered at the bottom */
   .fab-add {
     display: inline-flex;
@@ -700,12 +845,24 @@ body.dark-theme .cancel-reason {
     transform: translateX(-50%) scale(0.98);
   }
 
-  /* Добавить отступ внизу списка, чтобы кнопка FAB не перекрывала карточки */
+  /* Добавить отступ внизу и вверху списка, чтобы кнопки не перекрывали карточки и заголовок */
   .records-area {
-    padding-bottom: 50px;
+    padding-bottom: 80px;
+    padding-top: 50px;
+  }
+
+  /* Показать нижнюю группу навигации */
+  .mobile-bottom-group { display: inline-flex; }
+
+  /* Переместить кнопку очистки кэша ниже, чтобы не перекрывала заголовок */
+  .cache-clear.mobile {
+    top: 60px;
   }
 
 }
+
+/* hide bottom group on desktop */
+.mobile-bottom-group { display: none; }
 
 /* Улучшения для touch устройств */
 @media (hover: none) and (pointer: coarse) {
@@ -753,6 +910,93 @@ body.dark-theme .cancel-reason {
 @keyframes rainbow {
   0% { filter: hue-rotate(0deg); }
   100% { filter: hue-rotate(360deg); }
+}
+
+/* === Tables === */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--bg-primary);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+table thead {
+  background: var(--bg-secondary);
+}
+
+table th {
+  padding: 12px;
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-primary);
+  border-bottom: 2px solid var(--border-color);
+  font-size: 14px;
+}
+
+table td {
+  padding: 12px;
+  border-bottom: 1px solid var(--border-color);
+  font-size: 14px;
+  color: var(--text-primary);
+}
+
+table tbody tr:hover {
+  background: var(--bg-secondary);
+}
+
+/* === Admin Panel Tabs === */
+.admin-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  border-bottom: 2px solid var(--border-color);
+  padding-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+/* === Grid Layout for Cards === */
+.admin-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+/* Service card tweaks to ensure actions never overflow */
+.service-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 110px;
+}
+
+.service-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+/* === Textarea Styling === */
+textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font-size: 14px;
+  font-family: inherit;
+  resize: vertical;
+  transition: border 0.2s ease;
+}
+
+textarea:focus {
+  outline: none;
+  border-color: #0066cc;
+  box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
 }
 
 

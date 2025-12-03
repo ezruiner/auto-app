@@ -1,15 +1,21 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import ResultCreateRecord from './ResultCreateRecord';
+import { getServices, getUsers, getMasters } from '../store/dataStore';
 
 export default function CreateCard({ onAdd, onClose }) {
   const [formData, setFormData] = useState({
     client: '',
     car: '',
-    service: '',
+    service: '', // service id
     price: '',
     date: '',
+    master: '',
     payment_status: "Pending"
   });
+
+  const [services, setServices] = useState([]);
+  const [clients, setClients] = useState([]);
+  const [masters, setMasters] = useState([]);
 
   const [result, setResult] = useState('');
 
@@ -20,6 +26,36 @@ export default function CreateCard({ onAdd, onClose }) {
       [name]: value
     }));
   };
+
+  useEffect(() => {
+    setServices(getServices());
+    setClients(getUsers().filter(u => u.role === 'client'));
+    setMasters(getMasters());
+  }, []);
+
+  // when service selected, fill price by default and filter masters
+  useEffect(() => {
+    if (!formData.service) return;
+    const svc = services.find(s => String(s.id) === String(formData.service));
+    if (svc && (!formData.price || Number(formData.price) === 0)) {
+      setFormData(prev => ({ ...prev, price: svc.price }));
+    }
+    // обновим список мастеров и сбросим текущего мастера если он не предоставляет услугу
+    setMasters(getMasters());
+    setFormData(prev => {
+      const curMaster = prev.master;
+      if (!curMaster) return prev;
+      try {
+        const m = getMasters().find(x => String(x.id) === String(curMaster));
+        if (!m) return { ...prev, master: '' };
+        const has = (m.services || []).map(s => String(s)).includes(String(formData.service));
+        if (!has) return { ...prev, master: '' };
+      } catch (err) {
+        return { ...prev, master: '' };
+      }
+      return prev;
+    });
+  }, [formData.service, services]);
 
   const handleSubmit = (e) => {
     e.preventDefault(); // предотвращаем перезагрузку страницы
@@ -39,13 +75,10 @@ export default function CreateCard({ onAdd, onClose }) {
       <form onSubmit={handleSubmit} className="create-form">
         <div>
           <label>Клиент:</label>
-          <input
-            type="text"
-            name="client"
-            value={formData.client}
-            onChange={handleChange}
-            required
-          />
+          <select name="client" value={formData.client} onChange={handleChange} required>
+            <option value="">-- выберите клиента --</option>
+            {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+          </select>
         </div>
 
         <div>
@@ -61,13 +94,10 @@ export default function CreateCard({ onAdd, onClose }) {
 
         <div>
           <label>Услуга:</label>
-          <input
-            type="text"
-            name="service"
-            value={formData.service}
-            onChange={handleChange}
-            required
-          />
+          <select name="service" value={formData.service} onChange={handleChange} required>
+            <option value="">-- выберите услугу --</option>
+            {services.map(s => <option key={s.id} value={s.id}>{s.name} — {s.price} ₽</option>)}
+          </select>
         </div>
 
         <div>
@@ -79,6 +109,16 @@ export default function CreateCard({ onAdd, onClose }) {
             onChange={handleChange}
             required
           />
+        </div>
+
+        <div>
+          <label>Мастер:</label>
+          <select name="master" value={formData.master} onChange={handleChange} required>
+            <option value="">-- выберите мастера --</option>
+            {masters
+              .filter(m => formData.service && (m.services || []).map(s => String(s)).includes(String(formData.service)))
+              .map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
+          </select>
         </div>
 
         <div>
