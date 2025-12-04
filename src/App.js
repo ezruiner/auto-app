@@ -10,6 +10,7 @@ import ConfirmForm from './components/ConfirmForm';
 import ThemeToggle from './components/ThemeToggle';
 import AdminPanel from './components/AdminPanel';
 import { getRecordCards } from './service/api';
+import { getUsers, getServices, getMasters } from './store/dataStore';
 
 function Navigation({ onOpenCreate, onToggleDisco, discoMode, showDiscoButton, isMobile }) {
   return (
@@ -205,7 +206,8 @@ function App() {
     if (type === 'edit') {
       const updated = {
         ...record,
-        client: data.client,
+        client: data.client, // Сохраняем ID или имя клиента
+        clientName: data.client, // Для отображения имени
         car: data.car,
         service: data.service,
         price: Number(data.price) || 0,
@@ -213,29 +215,35 @@ function App() {
         payment_status: normalizeStatus(data.payment_status)
       };
       setRecords(prev => prev.map(r => (String(r.id) === String(record.id) ? updated : r)));
+      closeModal();
     }
 
     if (type === 'delete') {
+      // Проверяем, что причина удаления не пуста
+      if (!data.reason || !data.reason.trim()) {
+        alert('Пожалуйста, введите причину удаления');
+        return;
+      }
       const cancelledAt = new Date().toISOString();
-      const updated = { ...record, payment_status: 'cancelled', cancel_reason: data.reason || '', cancelledAt };
+      const updated = { ...record, payment_status: 'cancelled', cancel_reason: data.reason, cancelledAt };
       try {
         const raw = localStorage.getItem('deletedRecords');
         const parsed = raw ? JSON.parse(raw) : [];
         const log = Array.isArray(parsed) ? parsed : [];
-        log.push({ id: record.id, deletedAt: cancelledAt, reason: data.reason || '', record: updated });
+        log.push({ id: record.id, deletedAt: cancelledAt, reason: data.reason, record: updated });
         localStorage.setItem('deletedRecords', JSON.stringify(log));
       } catch (err) {
         console.warn('failed to store deletedRecords', err);
       }
       setRecords(prev => prev.map(r => (String(r.id) === String(record.id) ? updated : r)));
+      closeModal();
     }
 
     if (type === 'confirm') {
       const updated = { ...record, payment_status: 'completed', payment_amount: Number(data.amount) || 0, payment_comment: data.comment || '' };
       setRecords(prev => prev.map(r => (String(r.id) === String(record.id) ? updated : r)));
+      closeModal();
     }
-
-    // Закрытие модала будет обработано через анимацию в Modal компоненте
   };
 
   // Эффект для применения disco класса к body
@@ -290,7 +298,14 @@ function App() {
         <Routes>
           <Route path="/" element={
             <div className="records-area">
-              <RecordList records={records} onEdit={editRecord} onDelete={deleteRecord} onConfirm={confirmRecord} />
+              <RecordList
+                records={records}
+                onEdit={editRecord}
+                onDelete={deleteRecord}
+                onConfirm={confirmRecord}
+                users={getUsers()}
+                services={getServices()}
+              />
               {isMobile && onRecordsRoute && (
                 <button className="cache-clear bottom-mobile" onClick={clearCache} title="Очистить кэш" aria-label="Очистить кэш">🗑️</button>
               )}
@@ -298,7 +313,14 @@ function App() {
           } />
           <Route path="/records" element={
             <div className="records-area">
-              <RecordList records={records} onEdit={editRecord} onDelete={deleteRecord} onConfirm={confirmRecord} />
+              <RecordList
+                records={records}
+                onEdit={editRecord}
+                onDelete={deleteRecord}
+                onConfirm={confirmRecord}
+                users={getUsers()}
+                services={getServices()}
+              />
               {isMobile && onRecordsRoute && (
                 <button className="cache-clear bottom-mobile" onClick={clearCache} title="Очистить кэш" aria-label="Очистить кэш">🗑️</button>
               )}
