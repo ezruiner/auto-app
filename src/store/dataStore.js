@@ -239,6 +239,54 @@ export function addShiftRevenue(shiftId, amount) {
 }
 
 /**
+ * Update shift data (for editing closed shifts)
+ */
+export function updateShift(shiftId, updates) {
+  const shifts = getShifts();
+  const shift = shifts.find(s => s.id === shiftId);
+
+  if (shift) {
+    // Allow editing of closed shifts
+    if (updates.openedAt !== undefined) {
+      shift.openedAt = updates.openedAt;
+    }
+    if (updates.closedAt !== undefined) {
+      shift.closedAt = updates.closedAt;
+    }
+    if (updates.notes !== undefined) {
+      shift.notes = updates.notes;
+    }
+
+    // If reopening a closed shift
+    if (updates.reopen !== undefined && updates.reopen === true && shift.closedAt) {
+      shift.closedAt = null;
+      // Update operator's current shift
+      updateUser(shift.operatorId, { currentShift: shift.id });
+    }
+
+    saveShifts(shifts);
+  }
+
+  return shift;
+}
+
+/**
+ * Reopen a closed shift
+ */
+export function reopenShift(shiftId) {
+  return updateShift(shiftId, { reopen: true });
+}
+
+/**
+ * Helper function to add minutes to a date string
+ */
+export function addMinutesToDate(dateString, minutes) {
+  const date = new Date(dateString);
+  date.setMinutes(date.getMinutes() + minutes);
+  return date.toISOString();
+}
+
+/**
  * Clean up orphaned shifts - shifts that belong to operators who no longer exist
  * This handles cases where operators were deleted before automatic shift closing was implemented
  */

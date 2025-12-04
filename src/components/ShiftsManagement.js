@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getOperators, getShifts, openShift, closeShift, getCurrentShift, cleanupOrphanedShifts } from '../store/dataStore';
+import { getOperators, getShifts, openShift, closeShift, getCurrentShift, cleanupOrphanedShifts, updateShift, reopenShift, addMinutesToDate } from '../store/dataStore';
 import Modal from './Modal';
 
 export default function ShiftsManagement() {
@@ -8,6 +8,10 @@ export default function ShiftsManagement() {
   const [modal, setModal] = useState(null);
   const [closeNotes, setCloseNotes] = useState('');
   const [selectedOperator, setSelectedOperator] = useState(null);
+  const [editShiftData, setEditShiftData] = useState(null);
+  const [editOpenedAt, setEditOpenedAt] = useState('');
+  const [editClosedAt, setEditClosedAt] = useState('');
+  const [editNotes, setEditNotes] = useState('');
 
   useEffect(() => {
     // Clean up any orphaned shifts on component load
@@ -56,7 +60,9 @@ export default function ShiftsManagement() {
   };
 
   const formatDate = (dateStr) => {
-    return new Date(dateStr).toLocaleString('ru-RU');
+    return new Date(dateStr).toLocaleString('ru-RU', {
+      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+    });
   };
 
   const getShiftDuration = (openedAt, closedAt) => {
@@ -65,6 +71,81 @@ export default function ShiftsManagement() {
     const hours = Math.floor(duration / 60);
     const minutes = duration % 60;
     return `${hours}ч ${minutes}м`;
+  };
+
+  const handleEditShift = (shift) => {
+    setEditShiftData(shift);
+    setEditOpenedAt(shift.openedAt);
+    setEditClosedAt(shift.closedAt || '');
+    setEditNotes(shift.notes || '');
+    setModal({ type: 'editShift', shiftId: shift.id });
+  };
+
+  const handleSaveEdit = () => {
+    if (!editShiftData) return;
+
+    const updates = {
+      openedAt: editOpenedAt,
+      notes: editNotes
+    };
+
+    if (editClosedAt) {
+      updates.closedAt = editClosedAt;
+    }
+
+    updateShift(editShiftData.id, updates);
+    setShifts(getShifts());
+    setModal(null);
+  };
+
+  const handleReopenShift = () => {
+    if (!editShiftData) return;
+
+    reopenShift(editShiftData.id);
+    setShifts(getShifts());
+    setOperators(getOperators());
+    setModal(null);
+  };
+
+  const adjustTime = (fieldType, minutes) => {
+    if (modal?.type !== 'editShift') return;
+
+    const newDate = fieldType === 'openedAt'
+      ? addMinutesToDate(editOpenedAt, minutes)
+      : addMinutesToDate(editClosedAt, minutes);
+
+    if (fieldType === 'openedAt') {
+      setEditOpenedAt(newDate);
+    } else {
+      setEditClosedAt(newDate);
+    }
+  };
+
+  const formatDateTime = (dateStr) => {
+    return new Date(dateStr).toLocaleString('ru-RU', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+    });
+  };
+
+  // Helper function to convert local time to ISO string
+  const localToISO = (localDateStr) => {
+    if (!localDateStr) return '';
+    const date = new Date(localDateStr);
+    return date.toISOString();
+  };
+
+  // Helper function to convert ISO to local datetime-local format
+  const isoToLocalInput = (isoDateStr) => {
+    if (!isoDateStr) return '';
+    const date = new Date(isoDateStr);
+    // Convert to local time and format for datetime-local input
+    const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+    return localDate.toISOString().slice(0, 16);
   };
 
   return (
@@ -179,13 +260,21 @@ export default function ShiftsManagement() {
               <div key={shift.id} className="shift-history-card">
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                   <h4>Смена: {operator?.name || 'Неизвестный'}</h4>
-                  {isOpen && (
+                  {isOpen ? (
                     <button
                       className="btn danger small"
                       onClick={() => handleCloseShift(operator?.id)}
                       style={{ padding: '4px 8px', fontSize: '12px' }}
                     >
                       🔴 Закрыть
+                    </button>
+                  ) : (
+                    <button
+                      className="btn primary small"
+                      onClick={() => handleEditShift(shift)}
+                      style={{ padding: '4px 8px', fontSize: '12px' }}
+                    >
+                      ✏️ Изменить
                     </button>
                   )}
                 </div>
@@ -219,21 +308,114 @@ export default function ShiftsManagement() {
       </div>
 
       {modal && modal.type === 'closeShift' && (
-        <Modal 
-          title="Закрыть смену" 
-          onCancel={() => setModal(null)} 
+        <Modal
+          title="Закрыть смену"
+          onCancel={() => setModal(null)}
           onConfirm={handleConfirmCloseShift}
           confirmLabel="Закрыть"
         >
           <div className="modal-form">
             <label>Примечания (опционально)
-              <textarea 
-                value={closeNotes} 
+              <textarea
+                value={closeNotes}
                 onChange={e => setCloseNotes(e.target.value)}
                 placeholder="Например: Всё прошло гладко, никаких проблем"
                 style={{ minHeight: '80px' }}
               />
             </label>
+          </div>
+        </Modal>
+      )}
+
+      {modal && modal.type === 'editShift' && (
+        <Modal
+          title="Редактировать смену"
+          onCancel={() => setModal(null)}
+          onConfirm={handleSaveEdit}
+          confirmLabel="Сохранить"
+        >
+          <div className="modal-form">
+            <div style={{ marginBottom: '16px' }}>
+              <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>
+                Время открытия:
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
+                  <input
+                    type="datetime-local"
+                    value={editOpenedAt ? isoToLocalInput(editOpenedAt) : ''}
+                    onChange={e => setEditOpenedAt(localToISO(e.target.value))}
+                    style={{ flex: 1 }}
+                  />
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <button
+                      className="btn small"
+                      onClick={() => adjustTime('openedAt', 15)}
+                      style={{ padding: '4px 8px' }}
+                    >
+                      +15м
+                    </button>
+                    <button
+                      className="btn small"
+                      onClick={() => adjustTime('openedAt', -15)}
+                      style={{ padding: '4px 8px' }}
+                    >
+                      -15м
+                    </button>
+                  </div>
+                </div>
+              </label>
+            </div>
+
+            <div style={{ marginBottom: '16px' }}>
+              <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>
+                Время закрытия:
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
+                  <input
+                    type="datetime-local"
+                    value={editClosedAt ? isoToLocalInput(editClosedAt) : ''}
+                    onChange={e => setEditClosedAt(localToISO(e.target.value))}
+                    style={{ flex: 1 }}
+                  />
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <button
+                      className="btn small"
+                      onClick={() => adjustTime('closedAt', 15)}
+                      style={{ padding: '4px 8px' }}
+                    >
+                      +15м
+                    </button>
+                    <button
+                      className="btn small"
+                      onClick={() => adjustTime('closedAt', -15)}
+                      style={{ padding: '4px 8px' }}
+                    >
+                      -15м
+                    </button>
+                  </div>
+                </div>
+              </label>
+            </div>
+
+            <label>
+              Примечания:
+              <textarea
+                value={editNotes}
+                onChange={e => setEditNotes(e.target.value)}
+                placeholder="Комментарии к смене"
+                style={{ minHeight: '80px' }}
+              />
+            </label>
+
+            {editShiftData?.closedAt && (
+              <div style={{ marginTop: '16px', display: 'flex', justifyContent: 'flex-end' }}>
+                <button
+                  className="btn primary"
+                  onClick={handleReopenShift}
+                  style={{ marginRight: '8px' }}
+                >
+                  🔄 Повторно открыть смену
+                </button>
+              </div>
+            )}
           </div>
         </Modal>
       )}
