@@ -13,7 +13,7 @@ export async function getRecordCards()
    
     catch (err)
     {
-        console.error("ошибка загрущки json" , err)
+        console.error("ошибка загрузки json" , err)
         return []; 
     }
 
