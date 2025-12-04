@@ -33,6 +33,13 @@ function MobileControls({ onToggleDisco, discoMode, showDiscoButton, onOpenCreat
       <Link to="/records" className="mbg-btn">📋 Список</Link>
       <button type="button" className="mbg-btn mbg-create" onClick={onOpenCreate}>➕ Создать запись</button>
       <Link to="/admin" className="mbg-btn">⚙️ Админ</Link>
+    </div>
+  );
+}
+
+function MobileThemeToggle() {
+  return (
+    <div className="mobile-theme-toggle">
       <ThemeToggle />
     </div>
   );
@@ -270,23 +277,30 @@ function App() {
         />
 
         {isMobile && (
-          <MobileControls 
-            onToggleDisco={() => setDiscoMode(!discoMode)} 
-            discoMode={discoMode} 
+          <MobileControls
+            onToggleDisco={() => setDiscoMode(!discoMode)}
+            discoMode={discoMode}
             showDiscoButton={showDiscoButton}
             onOpenCreate={() => setModal({ type: 'create' })}
           />
         )}
+        {isMobile && <MobileThemeToggle />}
 
         <Routes>
           <Route path="/" element={
             <div className="records-area">
               <RecordList records={records} onEdit={editRecord} onDelete={deleteRecord} onConfirm={confirmRecord} />
+              {isMobile && onRecordsRoute && (
+                <button className="cache-clear bottom-mobile" onClick={clearCache} title="Очистить кэш" aria-label="Очистить кэш">🗑️</button>
+              )}
             </div>
           } />
           <Route path="/records" element={
             <div className="records-area">
               <RecordList records={records} onEdit={editRecord} onDelete={deleteRecord} onConfirm={confirmRecord} />
+              {isMobile && onRecordsRoute && (
+                <button className="cache-clear bottom-mobile" onClick={clearCache} title="Очистить кэш" aria-label="Очистить кэш">🗑️</button>
+              )}
             </div>
           } />
           <Route path="/admin" element={<AdminPanel />} />
@@ -296,13 +310,7 @@ function App() {
         {onRecordsRoute && !isMobile && (
           <button className="cache-clear desktop" onClick={clearCache} title="Очистить кэш">🗑️ Очистить кэш</button>
         )}
-        {onRecordsRoute && isMobile && (
-          <button className="cache-clear mobile" onClick={clearCache} title="Очистить кэш">🗑️</button>
-        )}
 
-        {isMobile && (
-          <button className="fab-add" onClick={() => setModal({ type: 'create' })} aria-label="Создать запись">➕ Создать запись</button>
-        )}
         {modal && modal.type === 'edit' && (
           <Modal title="Редактировать запись" onCancel={closeModal} onConfirm={() => handleModalConfirm(modal.formData)} confirmLabel="Сохранить">
             <EditForm initial={modal.record} onChange={(fd) => { modal.formData = fd; }} />
