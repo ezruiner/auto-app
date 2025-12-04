@@ -731,7 +731,7 @@ select:disabled {
     position: fixed;
     left: 50%;
     transform: translateX(-50%);
-    bottom: 15px;
+    bottom: 25px;
     z-index: 3000;
     display: inline-flex !important;
     align-items: center;
@@ -739,11 +739,11 @@ select:disabled {
     border: 1px solid var(--border-color);
     border-radius: 999px;
     box-shadow: var(--shadow-lg);
-    padding: 5px;
+    padding: 2px;
     gap: 0;
     width: 70%;
-    max-width: 400px;
-    min-width: 350px;
+    max-width: 350px;
+    min-width: 320px;
   }
 
   /* Subtle dark gradient background for mobile navigation */
@@ -761,7 +761,7 @@ select:disabled {
   .mbg-btn {
     background: transparent;
     border: none;
-    padding: 10px 16px;
+    padding: 14px 12px;
     font-size: 15px;
     cursor: pointer;
     color: var(--text-primary);
@@ -779,7 +779,7 @@ select:disabled {
     background: linear-gradient(90deg,#0066cc,#0052a3);
     color: #fff;
     border-radius: 999px;
-    margin: 0 6px;
+    margin: -5vw 6px;
     box-shadow: var(--shadow);
     white-space: normal;
     min-height: 44px;
