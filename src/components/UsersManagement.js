@@ -132,17 +132,7 @@ export default function UsersManagement() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   {services.map(service => (
                     <div key={service.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', padding: '6px 8px', borderRadius: 6, background: 'var(--bg-secondary)' }}>
-                      <div style={{ display: 'flex', gap: '8px', alignItems: 'center', cursor: 'pointer' }}
-                           onClick={() => {
-                             const newServices = formData.services.includes(service.id)
-                               ? formData.services.filter(id => id !== service.id)
-                               : [...formData.services, service.id];
-                             setFormData({ ...formData, services: newServices });
-                           }}>
-                        <div style={{ fontWeight: 500 }}>{service.name}</div>
-                        <div style={{ color: 'var(--text-secondary)', fontSize: 13 }}>{service.price} ₽</div>
-                      </div>
-                      <div onClick={(e) => e.stopPropagation()}>
+                      <label style={{ display: 'flex', gap: '8px', alignItems: 'center', cursor: 'pointer', flex: 1, margin: 0 }}>
                         <input
                           type="checkbox"
                           checked={formData.services.includes(service.id)}
@@ -152,8 +142,11 @@ export default function UsersManagement() {
                               : formData.services.filter(id => id !== service.id);
                             setFormData({ ...formData, services: newServices });
                           }}
+                          style={{ cursor: 'pointer' }}
                         />
-                      </div>
+                        <div style={{ fontWeight: 500 }}>{service.name}</div>
+                        <div style={{ color: 'var(--text-secondary)', fontSize: 13 }}>{service.price} ₽</div>
+                      </label>
                     </div>
                   ))}
                 </div>
