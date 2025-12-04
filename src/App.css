@@ -746,6 +746,18 @@ select:disabled {
     min-width: 350px;
   }
 
+  /* Subtle dark gradient background for mobile navigation */
+  .mobile-bottom-gradient {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 100px;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.452) 0%, rgba(0, 0, 0, 0) 100%);
+    pointer-events: none;
+    z-index: 2999;
+  }
+
   .mbg-btn {
     background: transparent;
     border: none;

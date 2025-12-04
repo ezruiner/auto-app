@@ -285,6 +285,7 @@ function App() {
           />
         )}
         {isMobile && <MobileThemeToggle />}
+        {isMobile && <div className="mobile-bottom-gradient" />}
 
         <Routes>
           <Route path="/" element={
