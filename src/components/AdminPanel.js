@@ -32,7 +32,7 @@ export default function AdminPanel() {
         ))}
       </div>
 
-      <div>
+      <div className="admin-content-area">
         {activeTab === 'shifts' && <ShiftsManagement />}
         {activeTab === 'services' && <ServicesManagement />}
         {activeTab === 'users' && <UsersManagement />}
