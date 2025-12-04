@@ -18,7 +18,8 @@ export default function AdminPanel() {
         display: 'flex',
         gap: '8px',
         borderBottom: '2px solid var(--border-color)',
-        paddingBottom: '12px'
+        paddingBottom: '12px',
+        paddingTop: '12px'
       }}>
         {tabs.map(tab => (
           <button
