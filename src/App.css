@@ -717,8 +717,11 @@ select:disabled {
     border: 1px solid var(--border-color);
     border-radius: 999px;
     box-shadow: var(--shadow-lg);
-    padding: 6px;
+    padding: 5px;
     gap: 0;
+    width: 70%;
+    max-width: 400px;
+    min-width: 350px;
   }
 
   .mbg-btn {
@@ -730,10 +733,8 @@ select:disabled {
     color: var(--text-primary);
     display: inline-flex;
     align-items: center;
-  }
-
-  .mbg-btn + .mbg-btn {
-    border-left: 1px solid rgba(128,128,128,0.12);
+    text-decoration: none;
+    white-space: nowrap;
   }
 
   .mbg-create {
@@ -742,6 +743,16 @@ select:disabled {
     border-radius: 999px;
     margin: 0 6px;
     box-shadow: var(--shadow);
+    white-space: normal;
+    min-height: 44px;
+    min-width: 120px;
+    max-width: 160px;
+  }
+
+  /* Keep single-line buttons from wrapping */
+  .mbg-btn:not(.mbg-create) {
+    white-space: nowrap;
+    min-width: 80px;
   }
 
   /* cache clear button positions */
