@@ -102,16 +102,18 @@ export function updateUser(id, updates) {
   const users = getUsers();
   const user = users.find(u => u.id === id);
   if (user) {
-    // Check if this is an operator and role is being changed or removed
+    // Check if this is an operator and role is being changed (not just name or other fields)
     const isRoleChange = updates.role !== undefined && updates.role !== user.role;
     const isOperator = user.role === 'operator';
 
-    // If role is changing from operator or operator is being modified, close any open shift
-    if (isOperator && (isRoleChange || updates.currentShift === undefined)) {
+    // Only close shift if the ROLE is actually changing, not other fields like name
+    if (isOperator && isRoleChange) {
       const currentShift = getCurrentShift(user.id);
       if (currentShift) {
-        // Automatically close the shift without notes when role changes
+        // Automatically close the shift when role changes
         closeShift(currentShift.id, `Автоматическое закрытие: изменение роли пользователя с ${user.role} на ${updates.role || 'неопределено'}`);
+        // Ensure currentShift is set to null in the updates
+        updates.currentShift = null;
       }
     }
 
