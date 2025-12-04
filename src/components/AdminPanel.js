@@ -14,10 +14,9 @@ export default function AdminPanel() {
 
   return (
     <div>
-      <div style={{ 
-        display: 'flex', 
-        gap: '8px', 
-        marginBottom: '24px', 
+      <div style={{
+        display: 'flex',
+        gap: '8px',
         borderBottom: '2px solid var(--border-color)',
         paddingBottom: '12px'
       }}>
