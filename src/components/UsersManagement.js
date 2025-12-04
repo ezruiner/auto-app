@@ -128,31 +128,66 @@ export default function UsersManagement() {
               </select>
             </label>
             {formData.role === 'master' && (
-              <label style={{ display: 'block' }}>Услуги (выберите несколько)
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '8px' }}>
+              <div style={{ display: 'block', marginBottom: '16px' }}>
+                <div style={{ fontWeight: 500, marginBottom: '8px' }}>Услуги (выберите несколько)</div>
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '8px',
+                  maxHeight: '300px',
+                  overflowY: 'auto',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: '8px',
+                  padding: '8px',
+                  backgroundColor: 'var(--bg-secondary)'
+                }}>
                   {services.map(service => (
-                    <div key={service.id} className="service-checkbox-container">
-                      <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', cursor: 'pointer', margin: 0, flex: 1 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1 }}>
-                          <div style={{ fontWeight: 500 }}>{service.name}</div>
-                          <div style={{ color: 'var(--text-secondary)', fontSize: 13 }}>{service.price} ₽</div>
-                        </div>
+                    <div key={service.id} style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '8px 12px',
+                      backgroundColor: 'var(--bg-primary)',
+                      borderRadius: '6px',
+                      border: '1px solid var(--border-color)',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease'
+                    }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      e.preventDefault();
+                      const newServices = formData.services.includes(service.id)
+                        ? formData.services.filter(id => id !== service.id)
+                        : [...formData.services, service.id];
+                      setFormData({ ...formData, services: newServices });
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <div style={{ fontWeight: 500, fontSize: '14px' }}>{service.name}</div>
+                        <div style={{ color: 'var(--text-secondary)', fontSize: '12px' }}>{service.price} ₽</div>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center' }}>
                         <input
                           type="checkbox"
                           checked={formData.services.includes(service.id)}
-                          onChange={e => {
+                          onChange={(e) => {
+                            e.stopPropagation();
+                            e.preventDefault();
                             const newServices = e.target.checked
                               ? [...formData.services, service.id]
                               : formData.services.filter(id => id !== service.id);
                             setFormData({ ...formData, services: newServices });
                           }}
-                          className="service-checkbox"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            e.preventDefault();
+                          }}
+                          style={{ cursor: 'pointer' }}
                         />
-                      </label>
+                      </div>
                     </div>
                   ))}
                 </div>
-              </label>
+              </div>
             )}
           </div>
         </Modal>
