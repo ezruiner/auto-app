@@ -108,62 +108,114 @@ export default function ShiftsManagement() {
 
       <div>
         <h3>История смен</h3>
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead>
-            <tr style={{ borderBottom: '2px solid var(--border-color)' }}>
-              <th style={{ padding: '12px', textAlign: 'left' }}>Оператор</th>
-              <th style={{ padding: '12px', textAlign: 'left' }}>Открыта</th>
-              <th style={{ padding: '12px', textAlign: 'left' }}>Закрыта</th>
-              <th style={{ padding: '12px', textAlign: 'left' }}>Длительность</th>
-              <th style={{ padding: '12px', textAlign: 'left' }}>Статус</th>
-              <th style={{ padding: '12px', textAlign: 'left' }}>Примечания</th>
-            </tr>
-          </thead>
-          <tbody>
-            {shifts.slice().reverse().map(shift => {
-              const operator = operators.find(o => o.id === shift.operatorId);
-              const isOpen = !shift.closedAt;
 
-              return (
-                <tr key={shift.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
-                  <td style={{ padding: '12px' }}>{operator?.name || 'Неизвестный'}</td>
-                  <td style={{ padding: '12px', fontSize: '12px' }}>{formatDate(shift.openedAt)}</td>
-                  <td style={{ padding: '12px', fontSize: '12px' }}>
-                    {shift.closedAt ? formatDate(shift.closedAt) : '—'}
-                  </td>
-                  <td style={{ padding: '12px', fontSize: '12px' }}>
-                    {getShiftDuration(shift.openedAt, shift.closedAt)}
-                  </td>
-                  <td style={{ padding: '12px' }}>
-                    <span style={{
-                      padding: '4px 8px',
-                      borderRadius: '4px',
-                      fontSize: '12px',
-                      backgroundColor: isOpen ? '#d1fae5' : '#f3f4f6',
-                      color: isOpen ? '#065f46' : '#374151'
-                    }}>
-                      {isOpen ? 'Открыта' : 'Закрыта'}
-                    </span>
-                  </td>
-                  <td style={{ padding: '12px', fontSize: '12px' }}>
-                    {shift.notes ? (
-                      <div style={{
-                        backgroundColor: 'var(--shift-notes-bg)',
-                        borderRadius: '6px',
-                        padding: '6px 8px',
-                        borderLeft: '3px solid var(--shift-notes-border)',
-                        maxWidth: '200px',
-                        color: 'var(--shift-notes-text)'
+        {/* Desktop table view */}
+        <div className="shifts-history-table">
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead>
+              <tr style={{ borderBottom: '2px solid var(--border-color)' }}>
+                <th style={{ padding: '12px', textAlign: 'left' }}>Оператор</th>
+                <th style={{ padding: '12px', textAlign: 'left' }}>Открыта</th>
+                <th style={{ padding: '12px', textAlign: 'left' }}>Закрыта</th>
+                <th style={{ padding: '12px', textAlign: 'left' }}>Длительность</th>
+                <th style={{ padding: '12px', textAlign: 'left' }}>Статус</th>
+                <th style={{ padding: '12px', textAlign: 'left' }}>Примечания</th>
+              </tr>
+            </thead>
+            <tbody>
+              {shifts.slice().reverse().map(shift => {
+                const operator = operators.find(o => o.id === shift.operatorId);
+                const isOpen = !shift.closedAt;
+
+                return (
+                  <tr key={shift.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
+                    <td style={{ padding: '12px' }}>{operator?.name || 'Неизвестный'}</td>
+                    <td style={{ padding: '12px', fontSize: '12px' }}>{formatDate(shift.openedAt)}</td>
+                    <td style={{ padding: '12px', fontSize: '12px' }}>
+                      {shift.closedAt ? formatDate(shift.closedAt) : '—'}
+                    </td>
+                    <td style={{ padding: '12px', fontSize: '12px' }}>
+                      {getShiftDuration(shift.openedAt, shift.closedAt)}
+                    </td>
+                    <td style={{ padding: '12px' }}>
+                      <span style={{
+                        padding: '4px 8px',
+                        borderRadius: '4px',
+                        fontSize: '12px',
+                        backgroundColor: isOpen ? '#d1fae5' : '#f3f4f6',
+                        color: isOpen ? '#065f46' : '#374151'
                       }}>
-                        {shift.notes}
-                      </div>
-                    ) : '—'}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+                        {isOpen ? 'Открыта' : 'Закрыта'}
+                      </span>
+                    </td>
+                    <td style={{ padding: '12px', fontSize: '12px' }}>
+                      {shift.notes ? (
+                        <div style={{
+                          backgroundColor: 'var(--shift-notes-bg)',
+                          borderRadius: '6px',
+                          padding: '6px 8px',
+                          borderLeft: '3px solid var(--shift-notes-border)',
+                          maxWidth: '200px',
+                          color: 'var(--shift-notes-text)'
+                        }}>
+                          {shift.notes}
+                        </div>
+                      ) : '—'}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Mobile card view */}
+        <div className="shifts-history-cards">
+          {shifts.slice().reverse().map(shift => {
+            const operator = operators.find(o => o.id === shift.operatorId);
+            const isOpen = !shift.closedAt;
+
+            return (
+              <div key={shift.id} className="shift-history-card">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                  <h4>Смена: {operator?.name || 'Неизвестный'}</h4>
+                  {isOpen && (
+                    <button
+                      className="btn danger small"
+                      onClick={() => handleCloseShift(operator?.id)}
+                      style={{ padding: '4px 8px', fontSize: '12px' }}
+                    >
+                      🔴 Закрыть
+                    </button>
+                  )}
+                </div>
+                <div className="detail-row">
+                  <span className="detail-label">Открыта:</span>
+                  <span className="detail-value">{formatDate(shift.openedAt)}</span>
+                </div>
+                <div className="detail-row">
+                  <span className="detail-label">Закрыта:</span>
+                  <span className="detail-value">{shift.closedAt ? formatDate(shift.closedAt) : '—'}</span>
+                </div>
+                <div className="detail-row">
+                  <span className="detail-label">Длительность:</span>
+                  <span className="detail-value">{getShiftDuration(shift.openedAt, shift.closedAt)}</span>
+                </div>
+                <div className="detail-row">
+                  <span className="detail-label">Статус:</span>
+                  <span className={`status-badge ${isOpen ? 'status-open' : 'status-closed'}`}>
+                    {isOpen ? 'Открыта' : 'Закрыта'}
+                  </span>
+                </div>
+                {shift.notes && (
+                  <div className="notes">
+                    {shift.notes}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       {modal && modal.type === 'closeShift' && (

@@ -979,6 +979,111 @@ table tbody tr:hover {
   background: var(--bg-secondary);
 }
 
+/* Mobile responsive table styles for shift history */
+.shifts-history-cards {
+  display: none; /* Hidden by default */
+}
+
+@media (max-width: 768px) {
+  /* Shift history table specific styles - make it scrollable */
+  .shifts-history-table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin-bottom: 20px;
+  }
+
+  .shifts-history-table table {
+    width: auto;
+    min-width: 600px;
+  }
+
+  /* Show mobile card layout */
+  .shifts-history-cards {
+    display: block;
+  }
+
+  /* Hide desktop table on mobile */
+  .shifts-history-table {
+    display: none;
+  }
+
+  /* Shift history card styles */
+  .shift-history-card {
+    background: var(--bg-primary);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    padding: 16px;
+    margin-bottom: 12px;
+    box-shadow: var(--shadow);
+  }
+
+  .shift-history-card h4 {
+    margin: 0 0 8px 0;
+    font-size: 16px;
+    color: var(--text-primary);
+  }
+
+  .shift-history-card .detail-row {
+    display: flex;
+    justify-content: space-between;
+    margin: 4px 0;
+    font-size: 14px;
+  }
+
+  .shift-history-card .detail-label {
+    font-weight: 500;
+    color: var(--text-secondary);
+  }
+
+  .shift-history-card .detail-value {
+    color: var(--text-primary);
+  }
+
+  .shift-history-card .status-badge {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    display: inline-block;
+  }
+
+  .shift-history-card .status-open {
+    background-color: #d1fae5;
+    color: #065f46;
+  }
+
+  .shift-history-card .status-closed {
+    background-color: #f3f4f6;
+    color: #374151;
+  }
+
+  .shift-history-card .notes {
+    background-color: var(--shift-notes-bg);
+    border-radius: 6px;
+    padding: 8px;
+    margin-top: 8px;
+    border-left: 3px solid var(--shift-notes-border);
+    color: var(--shift-notes-text);
+    font-size: 14px;
+  }
+
+  /* Mobile shift card action button */
+  .shift-history-card .btn.small {
+    padding: 4px 8px;
+    font-size: 12px;
+    min-height: auto;
+  }
+
+  /* Shift card header with action button */
+  .shift-history-card .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+}
+
 /* === Admin Panel Tabs === */
 .admin-tabs {
   display: flex;
