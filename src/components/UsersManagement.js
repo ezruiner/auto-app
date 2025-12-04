@@ -128,11 +128,15 @@ export default function UsersManagement() {
               </select>
             </label>
             {formData.role === 'master' && (
-              <label>Услуги (выберите несколько)
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <label style={{ display: 'block' }}>Услуги (выберите несколько)
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '8px' }}>
                   {services.map(service => (
-                    <div key={service.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', padding: '6px 8px', borderRadius: 6, background: 'var(--bg-secondary)' }}>
-                      <label style={{ display: 'flex', gap: '8px', alignItems: 'center', cursor: 'pointer', flex: 1, margin: 0 }}>
+                    <div key={service.id} className="service-checkbox-container">
+                      <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', cursor: 'pointer', margin: 0, flex: 1 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1 }}>
+                          <div style={{ fontWeight: 500 }}>{service.name}</div>
+                          <div style={{ color: 'var(--text-secondary)', fontSize: 13 }}>{service.price} ₽</div>
+                        </div>
                         <input
                           type="checkbox"
                           checked={formData.services.includes(service.id)}
@@ -142,10 +146,8 @@ export default function UsersManagement() {
                               : formData.services.filter(id => id !== service.id);
                             setFormData({ ...formData, services: newServices });
                           }}
-                          style={{ cursor: 'pointer' }}
+                          className="service-checkbox"
                         />
-                        <div style={{ fontWeight: 500 }}>{service.name}</div>
-                        <div style={{ color: 'var(--text-secondary)', fontSize: 13 }}>{service.price} ₽</div>
                       </label>
                     </div>
                   ))}

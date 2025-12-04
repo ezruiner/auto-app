@@ -1032,5 +1032,75 @@ textarea:focus {
   box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
 }
 
+/* === Service Checkbox Styling === */
+.service-checkbox-container {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 12px;
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  transition: all 0.2s ease;
+  flex: 0 1 calc(50% - 4px);
+  min-width: 200px;
+}
+
+.service-checkbox-container:hover {
+  border-color: #0066cc;
+  background: var(--bg-primary);
+}
+
+.service-checkbox {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  border: 2px solid var(--border-color);
+  border-radius: 4px;
+  cursor: pointer;
+  background: var(--bg-primary);
+  position: relative;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.service-checkbox:hover {
+  border-color: #0066cc;
+}
+
+.service-checkbox:checked {
+  background: #10b981;
+  border-color: #10b981;
+}
+
+.service-checkbox:checked::after {
+  content: '✓';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.service-checkbox:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+}
+
+.service-checkbox:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+@media (max-width: 768px) {
+  .service-checkbox-container {
+    flex: 0 1 100%;
+    min-width: auto;
+  }
+}
 
 
