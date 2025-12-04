@@ -201,6 +201,7 @@ export default function ShiftsManagement() {
                 <th style={{ padding: '12px', textAlign: 'left' }}>Длительность</th>
                 <th style={{ padding: '12px', textAlign: 'left' }}>Статус</th>
                 <th style={{ padding: '12px', textAlign: 'left' }}>Примечания</th>
+                <th style={{ padding: '12px', textAlign: 'left' }}>Действия</th>
               </tr>
             </thead>
             <tbody>
@@ -242,6 +243,25 @@ export default function ShiftsManagement() {
                           {shift.notes}
                         </div>
                       ) : '—'}
+                    </td>
+                    <td style={{ padding: '12px', whiteSpace: 'nowrap' }}>
+                      {isOpen ? (
+                        <button
+                          className="btn danger small"
+                          onClick={() => handleCloseShift(operator?.id)}
+                          style={{ padding: '4px 8px', fontSize: '12px', marginRight: '4px' }}
+                        >
+                          🔴 Закрыть
+                        </button>
+                      ) : (
+                        <button
+                          className="btn primary small"
+                          onClick={() => handleEditShift(shift)}
+                          style={{ padding: '4px 8px', fontSize: '12px' }}
+                        >
+                          ✏️ Изменить
+                        </button>
+                      )}
                     </td>
                   </tr>
                 );
