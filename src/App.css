@@ -683,21 +683,8 @@ select:disabled {
   }
 
   /* Показать новую нижнюю группу навигации */
-  .mobile-bottom-group { display: inline-flex; }
+  .mobile-bottom-group { display: inline-flex !important; }
 
-  /* Скрыть старые верхние мобильные контролы, если они есть */
-  .mobile-controls { display: none; }
-
-  /* Создать новую мобильную панель с кнопками диско и темы */
-  .mobile-controls {
-    position: fixed;
-    top: 12px;
-    right: 12px;
-    z-index: 3000;
-    display: flex;
-    gap: 8px;
-    align-items: center;
-  }
 
   /* Mobile bottom grouped navigation */
   .mobile-bottom-group {
@@ -705,8 +692,8 @@ select:disabled {
     left: 50%;
     transform: translateX(-50%);
     bottom: 14px;
-    z-index: 2600;
-    display: inline-flex;
+    z-index: 3000;
+    display: inline-flex !important;
     align-items: center;
     background: var(--bg-primary);
     border: 1px solid var(--border-color);
@@ -764,28 +751,6 @@ select:disabled {
     box-shadow: var(--shadow);
   }
 
-  .disco-btn {
-    background: var(--bg-primary);
-    border: 1px solid var(--border-color);
-    padding: 8px 12px;
-    border-radius: 8px;
-    box-shadow: var(--shadow);
-    font-size: 14px;
-    cursor: pointer;
-    touch-action: manipulation;
-    color: var(--text-primary);
-    font-weight: 500;
-    transition: all 0.2s ease;
-  }
-
-  .disco-btn:hover {
-    background: var(--bg-secondary);
-    transform: scale(1.05);
-  }
-
-  .disco-btn:active {
-    transform: scale(0.98);
-  }
 
   .theme-toggle {
     background: var(--bg-primary);

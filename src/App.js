@@ -33,11 +33,6 @@ function MobileControls({ onToggleDisco, discoMode, showDiscoButton, onOpenCreat
       <Link to="/records" className="mbg-btn">📋 Список</Link>
       <button type="button" className="mbg-btn mbg-create" onClick={onOpenCreate}>➕ Создать запись</button>
       <Link to="/admin" className="mbg-btn">⚙️ Админ</Link>
-      {showDiscoButton && (
-        <button className="disco-btn mobile-inline" onClick={onToggleDisco}>
-          {discoMode ? '🎉' : '🎈'}
-        </button>
-      )}
       <ThemeToggle />
     </div>
   );
@@ -79,9 +74,7 @@ function App() {
 
   const [discoMode, setDiscoMode] = useState(false);
   const [showDiscoButton, setShowDiscoButton] = useState(false);
-  const [swipeStart, setSwipeStart] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
-  const [longPressTimer, setLongPressTimer] = useState(null);
 
   // детекция мобильного устройства
   useEffect(() => {
@@ -146,81 +139,12 @@ function App() {
       }
     };
 
-    const handleTouchStart = (e) => {
-      if (isMobile && e.touches.length === 1) {
-        const touch = e.touches[0];
-        
-        // Получаем элемент с заголовком списка
-        const listHeader = document.querySelector('.list-header');
-        const headerBottom = listHeader ? listHeader.getBoundingClientRect().bottom : 100;
-         
-        // Длинное нажатие в области до кнопок фильтрации для активации
-        if (touch.clientY < headerBottom) {
-          const timer = setTimeout(() => {
-            setShowDiscoButton(prev => !prev);
-          }, 1000); // 1 секунда длинного нажатия
-          
-          setLongPressTimer(timer);
-        }
-      }
-    };
-
-    const handleTouchEnd = (e) => {
-      if (isMobile && e.changedTouches.length === 1) {
-        // Отменяем длинное нажатие если пользователь отпустил палец раньше времени
-        if (longPressTimer) {
-          clearTimeout(longPressTimer);
-          setLongPressTimer(null);
-        }
-        
-        // Обрабатываем свайп только если он начался в области до кнопок фильтрации
-        if (swipeStart > 0) {
-          const touch = e.changedTouches[0];
-          // Получаем элемент с заголовком списка
-          const listHeader = document.querySelector('.list-header');
-          const headerBottom = listHeader ? listHeader.getBoundingClientRect().bottom : 150;
-          // Проверяем, что свайп начался в области до кнопок фильтрации
-          if (touch.clientY < headerBottom) {
-            const swipeDistance = touch.clientX - swipeStart;
-            const swipeThreshold = 100; // Минимальное расстояние для свайпа
-            
-            if (Math.abs(swipeDistance) > swipeThreshold) {
-              // Свайп влево или вправо активирует кнопку диско
-              setShowDiscoButton(prev => !prev);
-            }
-          }
-          setSwipeStart(0);
-        }
-      }
-    };
-
-    const handleTouchMove = (e) => {
-      if (isMobile && e.touches.length === 1) {
-        const touch = e.touches[0];
-        // Свайп работает только в области до кнопок фильтрации
-        if (swipeStart === 0) {
-          // Получаем элемент с заголовком списка
-          const listHeader = document.querySelector('.list-header');
-          const headerBottom = listHeader ? listHeader.getBoundingClientRect().bottom : 150;
-          if (touch.clientY < headerBottom) {
-            setSwipeStart(touch.clientX);
-          }
-        }
-      }
-    };
-
     document.addEventListener('keydown', handleKeyDown);
-    document.addEventListener('touchstart', handleTouchStart, { passive: true });
-    document.addEventListener('touchmove', handleTouchMove, { passive: true });
-    document.addEventListener('touchend', handleTouchEnd, { passive: true });
 
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
-      document.removeEventListener('touchstart', handleTouchStart);
-      document.removeEventListener('touchmove', handleTouchMove);
-      document.removeEventListener('touchend', handleTouchEnd);
     };
-  }, [isMobile, swipeStart, longPressTimer]);
+  }, []);
 
   // сохраняем в localStorage при изменении state — используем сравнение чтобы меньше перезаписывать
   useEffect(() => {
