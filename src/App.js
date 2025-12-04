@@ -10,6 +10,7 @@ import ConfirmForm from './components/ConfirmForm';
 import ThemeToggle from './components/ThemeToggle';
 import AdminPanel from './components/AdminPanel';
 import { getRecordCards } from './service/api';
+import { getUsers, getServices, getMasters } from './store/dataStore';
 
 function Navigation({ onOpenCreate, onToggleDisco, discoMode, showDiscoButton, isMobile }) {
   return (
@@ -205,7 +206,8 @@ function App() {
     if (type === 'edit') {
       const updated = {
         ...record,
-        client: data.client,
+        client: data.client, // Сохраняем ID или имя клиента
+        clientName: data.client, // Для отображения имени
         car: data.car,
         service: data.service,
         price: Number(data.price) || 0,
@@ -290,7 +292,14 @@ function App() {
         <Routes>
           <Route path="/" element={
             <div className="records-area">
-              <RecordList records={records} onEdit={editRecord} onDelete={deleteRecord} onConfirm={confirmRecord} />
+              <RecordList
+                records={records}
+                onEdit={editRecord}
+                onDelete={deleteRecord}
+                onConfirm={confirmRecord}
+                users={getUsers()}
+                services={getServices()}
+              />
               {isMobile && onRecordsRoute && (
                 <button className="cache-clear bottom-mobile" onClick={clearCache} title="Очистить кэш" aria-label="Очистить кэш">🗑️</button>
               )}
@@ -298,7 +307,14 @@ function App() {
           } />
           <Route path="/records" element={
             <div className="records-area">
-              <RecordList records={records} onEdit={editRecord} onDelete={deleteRecord} onConfirm={confirmRecord} />
+              <RecordList
+                records={records}
+                onEdit={editRecord}
+                onDelete={deleteRecord}
+                onConfirm={confirmRecord}
+                users={getUsers()}
+                services={getServices()}
+              />
               {isMobile && onRecordsRoute && (
                 <button className="cache-clear bottom-mobile" onClick={clearCache} title="Очистить кэш" aria-label="Очистить кэш">🗑️</button>
               )}
