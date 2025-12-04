@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getOperators, getShifts, openShift, closeShift, getCurrentShift } from '../store/dataStore';
+import { getOperators, getShifts, openShift, closeShift, getCurrentShift, cleanupOrphanedShifts } from '../store/dataStore';
 import Modal from './Modal';
 
 export default function ShiftsManagement() {
@@ -10,6 +10,8 @@ export default function ShiftsManagement() {
   const [selectedOperator, setSelectedOperator] = useState(null);
 
   useEffect(() => {
+    // Clean up any orphaned shifts on component load
+    cleanupOrphanedShifts();
     setOperators(getOperators());
     setShifts(getShifts());
   }, []);
@@ -114,6 +116,7 @@ export default function ShiftsManagement() {
               <th style={{ padding: '12px', textAlign: 'left' }}>Закрыта</th>
               <th style={{ padding: '12px', textAlign: 'left' }}>Длительность</th>
               <th style={{ padding: '12px', textAlign: 'left' }}>Статус</th>
+              <th style={{ padding: '12px', textAlign: 'left' }}>Примечания</th>
             </tr>
           </thead>
           <tbody>
@@ -132,8 +135,8 @@ export default function ShiftsManagement() {
                     {getShiftDuration(shift.openedAt, shift.closedAt)}
                   </td>
                   <td style={{ padding: '12px' }}>
-                    <span style={{ 
-                      padding: '4px 8px', 
+                    <span style={{
+                      padding: '4px 8px',
                       borderRadius: '4px',
                       fontSize: '12px',
                       backgroundColor: isOpen ? '#d1fae5' : '#f3f4f6',
@@ -141,6 +144,20 @@ export default function ShiftsManagement() {
                     }}>
                       {isOpen ? 'Открыта' : 'Закрыта'}
                     </span>
+                  </td>
+                  <td style={{ padding: '12px', fontSize: '12px' }}>
+                    {shift.notes ? (
+                      <div style={{
+                        backgroundColor: 'var(--shift-notes-bg)',
+                        borderRadius: '6px',
+                        padding: '6px 8px',
+                        borderLeft: '3px solid var(--shift-notes-border)',
+                        maxWidth: '200px',
+                        color: 'var(--shift-notes-text)'
+                      }}>
+                        {shift.notes}
+                      </div>
+                    ) : '—'}
                   </td>
                 </tr>
               );

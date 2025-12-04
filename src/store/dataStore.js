@@ -102,6 +102,19 @@ export function updateUser(id, updates) {
   const users = getUsers();
   const user = users.find(u => u.id === id);
   if (user) {
+    // Check if this is an operator and role is being changed or removed
+    const isRoleChange = updates.role !== undefined && updates.role !== user.role;
+    const isOperator = user.role === 'operator';
+
+    // If role is changing from operator or operator is being modified, close any open shift
+    if (isOperator && (isRoleChange || updates.currentShift === undefined)) {
+      const currentShift = getCurrentShift(user.id);
+      if (currentShift) {
+        // Automatically close the shift without notes when role changes
+        closeShift(currentShift.id, `Автоматическое закрытие: изменение роли пользователя с ${user.role} на ${updates.role || 'неопределено'}`);
+      }
+    }
+
     Object.assign(user, updates);
     saveUsers(users);
   }
@@ -110,6 +123,17 @@ export function updateUser(id, updates) {
 
 export function deleteUser(id) {
   const users = getUsers();
+  const userToDelete = users.find(u => u.id === id);
+
+  // If the user being deleted is an operator with an open shift, close it first
+  if (userToDelete && userToDelete.role === 'operator') {
+    const currentShift = getCurrentShift(userToDelete.id);
+    if (currentShift) {
+      // Automatically close the shift with a deletion comment
+      closeShift(currentShift.id, `Автоматическое закрытие: пользователь удалён`);
+    }
+  }
+
   const filtered = users.filter(u => u.id !== id);
   saveUsers(filtered);
 }
@@ -210,4 +234,32 @@ export function addShiftRevenue(shiftId, amount) {
     saveShifts(shifts);
   }
   return shift;
+}
+
+/**
+ * Clean up orphaned shifts - shifts that belong to operators who no longer exist
+ * This handles cases where operators were deleted before automatic shift closing was implemented
+ */
+export function cleanupOrphanedShifts() {
+  const shifts = getShifts();
+  const users = getUsers();
+  const userIds = users.map(u => u.id);
+
+  let cleanedUp = false;
+
+  shifts.forEach(shift => {
+    // If shift is open and belongs to a non-existent operator
+    if (!shift.closedAt && !userIds.includes(shift.operatorId)) {
+      // Close the orphaned shift
+      shift.closedAt = new Date().toISOString();
+      shift.notes = `Автоматическое закрытие: оператор удалён (очистка данных)`;
+      cleanedUp = true;
+    }
+  });
+
+  if (cleanedUp) {
+    saveShifts(shifts);
+  }
+
+  return cleanedUp;
 }
