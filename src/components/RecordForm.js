@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import ResultCreateRecord from './ResultCreateRecord';
-import { getServices, getUsers, getMasters } from '../store/dataStore';
+import { getServices, getUsers, getMasters, findOrCreateClient } from '../store/dataStore';
 
 export default function CreateCard({ onAdd, onClose }) {
   const [formData, setFormData] = useState({
@@ -59,8 +59,25 @@ export default function CreateCard({ onAdd, onClose }) {
 
   const handleSubmit = (e) => {
     e.preventDefault(); // предотвращаем перезагрузку страницы
-    // вызвать переданный обработчик добавления записи
-    if (onAdd) onAdd(formData);
+
+    // Автоматическое создание клиента, если это новое имя
+    const clientName = formData.client;
+    if (clientName && clientName.trim() !== '') {
+      const client = findOrCreateClient(clientName);
+      if (client) {
+        // Обновим форму с ID клиента
+        const updatedFormData = {
+          ...formData,
+          client: client.id // Сохраняем ID клиента
+        };
+        if (onAdd) onAdd(updatedFormData);
+      } else {
+        if (onAdd) onAdd(formData);
+      }
+    } else {
+      if (onAdd) onAdd(formData);
+    }
+
     setResult('Запись успешно создана!');
     // очистим форму и перейдём к списку
     setFormData({ client: '', car: '', service: '', price: '', date: '', payment_status: 'Pending' });
@@ -122,7 +139,7 @@ export default function CreateCard({ onAdd, onClose }) {
         </div>
 
         <div>
-          <label>Дата:</label>
+          <label>Дата записи:</label>
           <input
             type="date"
             name="date"

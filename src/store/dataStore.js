@@ -98,6 +98,36 @@ export function addUser(user) {
   return newUser;
 }
 
+/**
+ * Find or create a client by name
+ */
+export function findOrCreateClient(clientName) {
+  if (!clientName || clientName.trim() === '') {
+    return null;
+  }
+
+  const users = getUsers();
+  const existingClient = users.find(u => u.role === 'client' && u.name.trim().toLowerCase() === clientName.trim().toLowerCase());
+
+  if (existingClient) {
+    return existingClient;
+  }
+
+  // Create new client
+  const newClient = {
+    id: Date.now(),
+    name: clientName.trim(),
+    role: 'client',
+    services: [],
+    currentShift: null,
+    createdAt: new Date().toISOString()
+  };
+
+  users.push(newClient);
+  saveUsers(users);
+  return newClient;
+}
+
 export function updateUser(id, updates) {
   const users = getUsers();
   const user = users.find(u => u.id === id);

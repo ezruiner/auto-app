@@ -33,7 +33,7 @@ export default function Card({ id, client, car, service, price, date, payment_st
         <p className="client">{client}</p>
         <p><span className="label">Автомобиль:</span> {car}</p>
         <p><span className="label">Услуга:</span> {service}</p>
-        <p><span className="label">Дата:</span> {date}</p>
+        <p><span className="label">Дата записи:</span> {date}</p>
         <p><span className="label">К оплате:</span> <strong>{formatPrice(price)} ₽</strong></p>
         {payment_status === 'completed' && (
           <>
