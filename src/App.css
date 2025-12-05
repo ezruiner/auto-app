@@ -1889,4 +1889,232 @@ textarea:focus {
   }
 }
 
+/* === Master Selector Styles === */
+.master-selector {
+  position: relative;
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.master-selector label {
+  display: block;
+  font-weight: 500;
+  color: var(--text-primary);
+  font-size: 16px;
+  line-height: 1.4;
+}
+
+.master-input-container {
+  position: relative;
+}
+
+.master-input {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: 2px solid var(--border-color);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font-size: 16px; /* Prevents zoom on iOS */
+  font-family: inherit;
+  transition: all 0.3s ease;
+  min-height: 44px; /* Touch-friendly size */
+}
+
+.master-input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
+  background: var(--bg-primary);
+}
+
+.master-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--bg-primary);
+  border: 2px solid #007bff;
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 1000;
+  box-shadow: var(--shadow-lg);
+}
+
+.master-option {
+  padding: 12px 16px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--border-color);
+  transition: background-color 0.2s ease;
+  color: var(--text-primary);
+  font-size: 16px;
+  min-height: 44px; /* Touch-friendly */
+  display: flex;
+  align-items: center;
+}
+
+.master-option:hover {
+  background: var(--bg-secondary);
+}
+
+.master-option:last-child {
+  border-bottom: none;
+}
+
+.master-error {
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 6px;
+  font-size: 14px;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+.new-master-hint {
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: 6px;
+  font-size: 14px;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+@media (max-width: 768px) {
+  .master-selector {
+    margin-bottom: 1.5rem;
+  }
+  
+  .master-input {
+    font-size: 16px; /* Предотвращает зум на мобильных */
+    padding: 14px 16px;
+  }
+  
+  .master-option {
+    padding: 14px 16px;
+    min-height: 48px;
+  }
+}
+
+/* === Service Selector Styles === */
+.service-selector {
+  position: relative;
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.service-selector label {
+  display: block;
+  font-weight: 500;
+  color: var(--text-primary);
+  font-size: 16px;
+  line-height: 1.4;
+}
+
+.service-input-container {
+  position: relative;
+}
+
+.service-input {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: 2px solid var(--border-color);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font-size: 16px; /* Prevents zoom on iOS */
+  font-family: inherit;
+  transition: all 0.3s ease;
+  min-height: 44px; /* Touch-friendly size */
+}
+
+.service-input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
+  background: var(--bg-primary);
+}
+
+.service-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--bg-primary);
+  border: 2px solid #007bff;
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 1000;
+  box-shadow: var(--shadow-lg);
+}
+
+.service-option {
+  padding: 12px 16px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--border-color);
+  transition: background-color 0.2s ease;
+  color: var(--text-primary);
+  font-size: 16px;
+  min-height: 44px; /* Touch-friendly */
+  display: flex;
+  align-items: center;
+}
+
+.service-option:hover {
+  background: var(--bg-secondary);
+}
+
+.service-option:last-child {
+  border-bottom: none;
+}
+
+.service-error {
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 6px;
+  font-size: 14px;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+.new-service-hint {
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: 6px;
+  font-size: 14px;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+@media (max-width: 768px) {
+  .service-selector {
+    margin-bottom: 1.5rem;
+  }
+  
+  .service-input {
+    font-size: 16px; /* Предотвращает зум на мобильных */
+    padding: 14px 16px;
+  }
+  
+  .service-option {
+    padding: 14px 16px;
+    min-height: 48px;
+  }
+}
+
 

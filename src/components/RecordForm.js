@@ -1,22 +1,23 @@
 import { useState, useEffect } from 'react';
 import ClientSelector from './ClientSelector';
 import CarSelector from './CarSelector';
+import MasterSelector from './MasterSelector';
+import ServiceSelector from './ServiceSelector';
 import { getServices, getUsers, getMasters, findOrCreateClient, addCarToHistory } from '../store/dataStore';
 
 export default function RecordForm({ initial = {}, onChange }) {
-  const [form, setForm] = useState({
-    client: '',
-    car: '',
-    service: '',
-    price: '',
-    date: '',
-    master: '',
-    payment_status: "Pending"
-  });
+  // Простая форма состояний - каждое поле отдельно
+  const [client, setClient] = useState('');
+  const [car, setCar] = useState('');
+  const [service, setService] = useState('');
+  const [price, setPrice] = useState('');
+  const [date, setDate] = useState('');
+  const [master, setMaster] = useState('');
 
   const [services, setServices] = useState([]);
   const [clients, setClients] = useState([]);
   const [masters, setMasters] = useState([]);
+  const [filteredMasters, setFilteredMasters] = useState([]);
 
   useEffect(() => {
     setServices(getServices());
@@ -24,12 +25,24 @@ export default function RecordForm({ initial = {}, onChange }) {
     setMasters(getMasters());
   }, []);
 
+  // Инициализация формы только при изменении initial
   useEffect(() => {
-    if (initial) {
-      // Resolve client ID to client name if needed
+    const hasInitialData = initial && (
+      initial.client || 
+      initial.car || 
+      initial.service || 
+      initial.price || 
+      initial.date || 
+      initial.master || 
+      initial.payment_status
+    );
+    
+    if (hasInitialData) {
+      // Режим редактирования
       let clientDisplayValue = initial.client || '';
+      
+      // Находим клиента если нужно
       if (initial.client && !initial.clientName) {
-        // Try to find client by ID if only ID is available
         const foundClient = clients.find(c => String(c.id) === String(initial.client));
         if (foundClient) {
           clientDisplayValue = foundClient.name;
@@ -38,44 +51,54 @@ export default function RecordForm({ initial = {}, onChange }) {
         clientDisplayValue = initial.clientName;
       }
       
-      setForm({
-        client: clientDisplayValue,
-        car: initial.car || '',
-        service: initial.service || '',
-        price: initial.price || '',
-        date: initial.date || '',
-        master: initial.master || '',
-        payment_status: initial.payment_status || 'Pending'
-      });
+      setClient(clientDisplayValue);
+      setCar(initial.car || '');
+      setService(initial.service || '');
+      setPrice(initial.price || '');
+      setDate(initial.date || '');
+      setMaster(initial.master || '');
     }
   }, [initial, clients]);
 
-  useEffect(() => onChange && onChange(form), [form]);
+  // Обновляем onChange при любом изменении
+  useEffect(() => {
+    // Убеждаемся, что цена всегда соответствует выбранной услуге
+    const currentPrice = service ? getServicePrice(service) : price;
+    const formData = {
+      client,
+      car,
+      service,
+      price: currentPrice,
+      date,
+      master,
+      payment_status: 'Pending' // Автоматически устанавливаем начальный статус
+    };
+    onChange && onChange(formData);
+  }, [client, car, service, price, date, master, services, onChange]);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm(prev => ({
-      ...prev,
-      [name]: value
-    }));
+  const getServicePrice = (id) => {
+    const s = services.find(x => x.id === id);
+    return s ? s.price : '';
   };
 
-  // when service selected, update price automatically and filter masters
+  const handleServiceChange = (value) => {
+    setService(value);
+    // Автоматически обновляем цену при смене услуги
+    const selected = services.find(s => s.id === value);
+    setPrice(selected ? selected.price : '');
+  };
+
+
+
+  // Фильтрация мастеров по услуге
   useEffect(() => {
-    if (!form.service) return;
-    const svc = services.find(s => String(s.id) === String(form.service));
-    if (svc) {
-      // Always update price when service changes
-      setForm(prev => ({ ...prev, price: svc.price }));
-    }
-  }, [form.service, services]);
+    const filtered = service
+      ? masters.filter(m => (m.services || []).map(s => String(s)).includes(String(service)))
+      : masters;
+    setFilteredMasters(filtered);
+  }, [service, masters]);
 
-  // Filter masters based on selected service
-  const filteredMasters = form.service
-    ? masters.filter(m => (m.services || []).map(s => String(s)).includes(String(form.service)))
-    : masters;
-
-  // Helper function to resolve client data (used by parent component)
+  // Helper function для разрешения данных клиента
   const resolveClientData = (clientValue) => {
     const clientName = clientValue.trim();
     let finalClientData = { id: clientName, name: clientName };
@@ -89,7 +112,9 @@ export default function RecordForm({ initial = {}, onChange }) {
         const newClient = findOrCreateClient(clientName);
         if (newClient) {
           finalClientData = { id: newClient.id, name: newClient.name };
-          setClients(getUsers().filter(u => u.role === 'client'));
+          // Обновляем список клиентов
+          const updatedClients = getUsers().filter(u => u.role === 'client');
+          setClients(updatedClients);
         }
       } else {
         finalClientData = { id: existingClient.id, name: existingClient.name };
@@ -99,77 +124,68 @@ export default function RecordForm({ initial = {}, onChange }) {
     return finalClientData;
   };
 
-  // Expose helper function for parent component to use
+  // Экспортируем helper функцию
   RecordForm.resolveClientData = resolveClientData;
 
   return (
     <div className="modal-form">
       <ClientSelector
         clients={clients}
-        value={form.client}
-        onChange={(clientName) => setForm({...form, client: clientName})}
+        value={client}
+        onChange={setClient}
         required
       />
       
       <CarSelector
-        value={form.car}
-        onChange={(carName) => setForm({...form, car: carName})}
+        value={car}
+        onChange={setCar}
         required
       />
       
-      <label>Услуга
-        <select 
-          value={form.service} 
-          onChange={e => setForm({...form, service: e.target.value, master: ''})}
-          required
-        >
-          <option value="">-- выберите услугу --</option>
-          {services.map(s => <option key={s.id} value={s.id}>{s.name} — {s.price} ₽</option>)}
-        </select>
-      </label>
+      <ServiceSelector
+        services={services}
+        value={service}
+        onChange={handleServiceChange}
+        required
+      />
       
       <label>Цена
         <input 
-          type="number" 
-          value={form.price} 
-          onChange={e => setForm({...form, price: e.target.value})}
-          required
-          min="0"
-          step="0.01"
+          type="text" 
+          value={service ? `${getServicePrice(service)} ₽` : ''} 
+          readOnly 
+          onFocus={(e) => e.currentTarget.select()} 
+          onKeyDown={(e) => e.preventDefault()} 
+          style={{ 
+            appearance: 'textfield', 
+            backgroundColor: 'var(--bg-secondary)', 
+            color: 'var(--text-primary)', 
+            border: '1px solid var(--border-color)', 
+            borderRadius: '6px', 
+            padding: '8px 10px', 
+            fontSize: '16px', 
+            width: '100%', 
+            outline: 'none', 
+            cursor: 'default' 
+          }} 
         />
       </label>
       
-      <label>Мастер
-        <select 
-          value={form.master} 
-          onChange={e => setForm({...form, master: e.target.value})}
-          disabled={!form.service}
-          required
-        >
-          <option value="">-- выберите мастера --</option>
-          {filteredMasters.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
-        </select>
-      </label>
+      <MasterSelector
+        masters={filteredMasters}
+        value={master}
+        onChange={setMaster}
+        required
+      />
       
       <label>Дата записи
         <input 
+          name="date"
           type="date" 
-          value={form.date} 
-          onChange={e => setForm({...form, date: e.target.value})}
+          value={date} 
+          onChange={(e) => setDate(e.target.value)}
           required
         />
-      </label>
-      
-      <label>Статус
-        <select 
-          value={form.payment_status} 
-          onChange={e => setForm({...form, payment_status: e.target.value})}
-        >
-          <option value="Pending">Ожидает</option>
-          <option value="in-progress">В работе</option>
-          <option value="completed">Проведена</option>
-          <option value="cancelled">Отменена</option>
-        </select>
       </label>
     </div>
   );

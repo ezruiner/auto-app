@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { getServices, getMasters, getUsers } from '../store/dataStore';
 import ClientSelector from './ClientSelector';
 import CarSelector from './CarSelector';
+import MasterSelector from './MasterSelector';
+import ServiceSelector from './ServiceSelector';
 
 export default function EditForm({ initial = {}, onChange }) {
   const [form, setForm] = useState({
@@ -10,6 +12,7 @@ export default function EditForm({ initial = {}, onChange }) {
   const [services, setServices] = useState([]);
   const [masters, setMasters] = useState([]);
   const [clients, setClients] = useState([]);
+  const [filteredMasters, setFilteredMasters] = useState([]);
 
   useEffect(() => {
     setServices(getServices());
@@ -43,17 +46,17 @@ export default function EditForm({ initial = {}, onChange }) {
     }
   }, [initial, clients]);
 
-  // when service selected, update price automatically
   useEffect(() => {
-    if (!form.service) return;
-    const svc = services.find(s => String(s.id) === String(form.service));
-    if (svc) {
-      // Always update price when service changes
-      setForm(prev => ({ ...prev, price: svc.price }));
+    // Убеждаемся, что цена всегда соответствует выбранной услуге
+    const formData = { ...form };
+    if (formData.service) {
+      const selected = services.find(s => s.id === formData.service);
+      if (selected) {
+        formData.price = selected.price;
+      }
     }
-  }, [form.service, services]);
-
-  useEffect(() => onChange && onChange(form), [form]);
+    onChange && onChange(formData);
+  }, [form, services, onChange]);
 
   const statusOptions = [
     { value: 'in-progress', label: 'В работе' },
@@ -62,9 +65,17 @@ export default function EditForm({ initial = {}, onChange }) {
   ];
 
   // Filter masters based on selected service
-  const filteredMasters = form.service
-    ? masters.filter(m => (m.services || []).map(s => String(s)).includes(String(form.service)))
-    : masters;
+  useEffect(() => {
+    const filtered = form.service
+      ? masters.filter(m => (m.services || []).map(s => String(s)).includes(String(form.service)))
+      : masters;
+    setFilteredMasters(filtered);
+  }, [form.service, masters]);
+
+  const getServicePrice = (id) => {
+    const s = services.find(x => x.id === id);
+    return s ? s.price : '';
+  };
 
   return (
     <div className="modal-form">
@@ -79,20 +90,43 @@ export default function EditForm({ initial = {}, onChange }) {
         onChange={(carName) => setForm({...form, car: carName})}
         required
       />
-      <label>Услуга
-        <select value={form.service} onChange={e=>setForm({...form, service: e.target.value, master: ''})}>
-          <option value="">-- выберите услугу --</option>
-          {services.map(s => <option key={s.id} value={s.id}>{s.name} — {s.price} ₽</option>)}
-        </select>
+      <ServiceSelector
+        services={services}
+        value={form.service}
+        onChange={(serviceId) => {
+          const selected = services.find(s => s.id === serviceId);
+          setForm(prev => ({ ...prev, service: serviceId, price: selected ? selected.price : prev.price }));
+        }}
+        required
+      />
+      <label>Цена
+        <input 
+          type="text" 
+          value={form.service ? `${getServicePrice(form.service)} ₽` : ''} 
+          readOnly 
+          onFocus={(e) => e.currentTarget.select()} 
+          onKeyDown={(e) => e.preventDefault()} 
+          style={{ 
+            appearance: 'textfield', 
+            backgroundColor: 'var(--bg-secondary)', 
+            color: 'var(--text-primary)', 
+            border: '1px solid var(--border-color)', 
+            borderRadius: '6px', 
+            padding: '8px 10px', 
+            fontSize: '16px', 
+            width: '100%', 
+            outline: 'none', 
+            cursor: 'default' 
+          }} 
+        />
       </label>
-      <label>Цена<input type="number" value={form.price} onChange={e=>setForm({...form, price: e.target.value})} /></label>
       <label>Дата записи<input type="date" value={form.date} onChange={e=>setForm({...form, date: e.target.value})} /></label>
-      <label>Мастер
-        <select value={form.master} onChange={e=>setForm({...form, master: e.target.value})} disabled={!form.service}>
-          <option value="">-- выберите мастера --</option>
-          {filteredMasters.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
-        </select>
-      </label>
+      <MasterSelector
+        masters={filteredMasters}
+        value={form.master}
+        onChange={(masterName) => setForm({...form, master: masterName})}
+        required
+      />
       <label>Статус
         <select value={form.payment_status} onChange={e=>setForm({...form, payment_status: e.target.value})}>
           {statusOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
