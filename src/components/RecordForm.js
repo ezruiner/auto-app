@@ -110,65 +110,96 @@ export default function CreateCard({ onAdd, onClose }) {
   };
 
   return (
-    <>
-      <form onSubmit={handleSubmit} className="create-form">
-        <ClientSelector
-          clients={clients}
-          value={formData.client}
-          onChange={(clientName) => setFormData(prev => ({ ...prev, client: clientName }))}
-          required
-        />
+    <div className="modal-window">
+      <div className="modal-container">
+        <div className="modal-content">
+          <h3 style={{ margin: '0 0 24px 0', fontSize: '24px', fontWeight: '600', color: 'var(--text-primary)' }}>
+            Создание новой записи
+          </h3>
+          
+          <form onSubmit={handleSubmit} className="modal-form-universal">
+            <ClientSelector
+              clients={clients}
+              value={formData.client}
+              onChange={(clientName) => setFormData(prev => ({ ...prev, client: clientName }))}
+              required
+            />
 
-        <CarSelector
-          value={formData.car}
-          onChange={(carName) => setFormData(prev => ({ ...prev, car: carName }))}
-          required
-        />
+            <CarSelector
+              value={formData.car}
+              onChange={(carName) => setFormData(prev => ({ ...prev, car: carName }))}
+              required
+            />
 
-        <div>
-          <label>Услуга:</label>
-          <select name="service" value={formData.service} onChange={handleChange} required>
-            <option value="">-- выберите услугу --</option>
-            {services.map(s => <option key={s.id} value={s.id}>{s.name} — {s.price} ₽</option>)}
-          </select>
+            <div className="form-field">
+              <label htmlFor="service-select">Услуга:</label>
+              <select 
+                name="service" 
+                id="service-select"
+                value={formData.service} 
+                onChange={handleChange} 
+                required
+              >
+                <option value="">-- выберите услугу --</option>
+                {services.map(s => <option key={s.id} value={s.id}>{s.name} — {s.price} ₽</option>)}
+              </select>
+            </div>
+
+            <div className="form-field">
+              <label htmlFor="price-input">Цена:</label>
+              <input
+                type="number"
+                name="price"
+                id="price-input"
+                value={formData.price}
+                onChange={handleChange}
+                required
+                min="0"
+                step="0.01"
+              />
+            </div>
+
+            <div className="form-field">
+              <label htmlFor="master-select">Мастер:</label>
+              <select 
+                name="master" 
+                id="master-select"
+                value={formData.master} 
+                onChange={handleChange} 
+                required
+              >
+                <option value="">-- выберите мастера --</option>
+                {masters
+                  .filter(m => formData.service && (m.services || []).map(s => String(s)).includes(String(formData.service)))
+                  .map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
+              </select>
+            </div>
+
+            <div className="form-field">
+              <label htmlFor="date-input">Дата записи:</label>
+              <input
+                type="date"
+                name="date"
+                id="date-input"
+                value={formData.date}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            <div className="modal-actions">
+              <button type="button" className="btn secondary" onClick={onClose}>
+                Отмена
+              </button>
+              <button type="submit" className="btn primary">
+                Создать запись
+              </button>
+            </div>
+          </form>
+
+          {result && <ResultCreateRecord result={result} />}
         </div>
-
-        <div>
-          <label>Цена:</label>
-          <input
-            type="number"
-            name="price"
-            value={formData.price}
-            onChange={handleChange}
-            required
-          />
-        </div>
-
-        <div>
-          <label>Мастер:</label>
-          <select name="master" value={formData.master} onChange={handleChange} required>
-            <option value="">-- выберите мастера --</option>
-            {masters
-              .filter(m => formData.service && (m.services || []).map(s => String(s)).includes(String(formData.service)))
-              .map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
-          </select>
-        </div>
-
-        <div>
-          <label>Дата записи:</label>
-          <input
-            type="date"
-            name="date"
-            value={formData.date}
-            onChange={handleChange}
-            required
-          />
-        </div>
-
-        <button type="submit">Создать запись</button>
-      </form>
-
-      {result && <ResultCreateRecord result={result} />}
-    </>
+      </div>
+    </div>
   );
 }
