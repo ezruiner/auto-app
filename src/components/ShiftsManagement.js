@@ -259,7 +259,7 @@ export default function ShiftsManagement() {
                           onClick={() => handleEditShift(shift)}
                           style={{ padding: '4px 8px', fontSize: '12px' }}
                         >
-                          ✏️ Изменить
+                          Изменить
                         </button>
                       )}
                     </td>
@@ -294,7 +294,7 @@ export default function ShiftsManagement() {
                       onClick={() => handleEditShift(shift)}
                       style={{ padding: '4px 8px', fontSize: '12px' }}
                     >
-                      ✏️ Изменить
+                      Изменить
                     </button>
                   )}
                 </div>
@@ -432,7 +432,7 @@ export default function ShiftsManagement() {
                   onClick={handleReopenShift}
                   style={{ marginRight: '8px' }}
                 >
-                  🔄 Повторно открыть смену
+                  Повторно открыть смену
                 </button>
               </div>
             )}

@@ -33,7 +33,17 @@ export default function EditForm({ initial = {}, onChange }) {
       } else if (initial.clientName) {
         clientDisplayValue = initial.clientName;
       }
-      
+
+      // Resolve master ID to master name if needed
+      let masterDisplayValue = initial.master || '';
+      if (initial.master && typeof initial.master === 'number') {
+        // Try to find master by ID if only ID is available
+        const foundMaster = masters.find(m => m.id === initial.master);
+        if (foundMaster) {
+          masterDisplayValue = foundMaster.name;
+        }
+      }
+
       setForm({
         client: clientDisplayValue,
         car: initial.car || '',
@@ -41,10 +51,10 @@ export default function EditForm({ initial = {}, onChange }) {
         price: initial.price || '',
         date: initial.date || '',
         payment_status: initial.payment_status || '',
-        master: initial.master || ''
+        master: masterDisplayValue
       });
     }
-  }, [initial, clients]);
+  }, [initial, clients, masters]);
 
   useEffect(() => {
     // Убеждаемся, что цена всегда соответствует выбранной услуге
@@ -100,24 +110,24 @@ export default function EditForm({ initial = {}, onChange }) {
         required
       />
       <label>Цена
-        <input 
-          type="text" 
-          value={form.service ? `${getServicePrice(form.service)} ₽` : ''} 
-          readOnly 
-          onFocus={(e) => e.currentTarget.select()} 
-          onKeyDown={(e) => e.preventDefault()} 
-          style={{ 
-            appearance: 'textfield', 
-            backgroundColor: 'var(--bg-secondary)', 
-            color: 'var(--text-primary)', 
-            border: '1px solid var(--border-color)', 
-            borderRadius: '6px', 
-            padding: '8px 10px', 
-            fontSize: '16px', 
-            width: '100%', 
-            outline: 'none', 
-            cursor: 'default' 
-          }} 
+        <input
+          type="text"
+          value={form.service ? `${getServicePrice(form.service)} ₽` : (form.price ? `${form.price} ₽` : '')}
+          readOnly
+          onFocus={(e) => e.currentTarget.select()}
+          onKeyDown={(e) => e.preventDefault()}
+          style={{
+            appearance: 'textfield',
+            backgroundColor: 'var(--bg-secondary)',
+            color: 'var(--text-primary)',
+            border: '1px solid var(--border-color)',
+            borderRadius: '6px',
+            padding: '8px 10px',
+            fontSize: '16px',
+            width: '100%',
+            outline: 'none',
+            cursor: 'default'
+          }}
         />
       </label>
       <label>Дата записи<input type="date" value={form.date} onChange={e=>setForm({...form, date: e.target.value})} /></label>
