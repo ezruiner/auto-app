@@ -1393,6 +1393,24 @@ textarea:focus {
   transform: scale(1.1);
 }
 
+/* Force button to stay on the right side */
+.car-option .remove-car-btn {
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+/* Ensure proper flex layout for car options */
+.car-option {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+}
+
+.car-name {
+  flex: 1 !important;
+  text-align: left;
+}
+
 .new-car-hint {
   margin-top: 0.5rem;
   padding: 0.5rem;

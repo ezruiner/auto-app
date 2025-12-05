@@ -39,7 +39,8 @@ export default function CreateCard({ onAdd, onClose }) {
   useEffect(() => {
     if (!formData.service) return;
     const svc = services.find(s => String(s.id) === String(formData.service));
-    if (svc && (!formData.price || Number(formData.price) === 0)) {
+    if (svc) {
+      // Always update price when service changes
       setFormData(prev => ({ ...prev, price: svc.price }));
     }
     // обновим список мастеров и сбросим текущего мастера если он не предоставляет услугу
@@ -91,11 +92,6 @@ export default function CreateCard({ onAdd, onClose }) {
       client: finalClientData.id, // Сохраняем ID клиента
       clientName: finalClientData.name // И сохраняем имя для отображения
     };
-
-    // Добавляем автомобиль в историю
-    if (formData.car && formData.car.trim()) {
-      addCarToHistory(formData.car.trim());
-    }
 
     if (onAdd) onAdd(updatedFormData);
 

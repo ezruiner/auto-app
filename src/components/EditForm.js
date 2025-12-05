@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getServices, getMasters, getUsers, addCarToHistory } from '../store/dataStore';
+import { getServices, getMasters, getUsers } from '../store/dataStore';
 import ClientSelector from './ClientSelector';
 import CarSelector from './CarSelector';
 
@@ -43,6 +43,16 @@ export default function EditForm({ initial = {}, onChange }) {
     }
   }, [initial, clients]);
 
+  // when service selected, update price automatically
+  useEffect(() => {
+    if (!form.service) return;
+    const svc = services.find(s => String(s.id) === String(form.service));
+    if (svc) {
+      // Always update price when service changes
+      setForm(prev => ({ ...prev, price: svc.price }));
+    }
+  }, [form.service, services]);
+
   useEffect(() => onChange && onChange(form), [form]);
 
   const statusOptions = [
@@ -66,13 +76,7 @@ export default function EditForm({ initial = {}, onChange }) {
       />
       <CarSelector
         value={form.car}
-        onChange={(carName) => {
-          setForm({...form, car: carName});
-          // Добавляем в историю при изменении
-          if (carName && carName.trim()) {
-            addCarToHistory(carName.trim());
-          }
-        }}
+        onChange={(carName) => setForm({...form, car: carName})}
         required
       />
       <label>Услуга

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getCarHistory, removeCarFromHistory } from '../store/dataStore';
+import { getCarHistory, removeCarFromHistory, addCarToHistory } from '../store/dataStore';
 
 export default function CarSelector({ 
   value = '', 
@@ -34,6 +34,14 @@ export default function CarSelector({
     onChange && onChange(newValue);
   };
 
+  const handleInputBlur = () => {
+    setTimeout(() => setShowDropdown(false), 200);
+    // Add to history only when user finishes typing (after blur)
+    if (inputValue && inputValue.trim()) {
+      addCarToHistory(inputValue.trim());
+    }
+  };
+
   const handleCarSelect = (car) => {
     setInputValue(car);
     setShowDropdown(false);
@@ -41,6 +49,7 @@ export default function CarSelector({
   };
 
   const handleRemoveCar = (carToRemove, e) => {
+    e.preventDefault();
     e.stopPropagation(); // Предотвращаем выбор элемента
     removeCarFromHistory(carToRemove);
     // Refresh car history from localStorage to ensure consistency
@@ -52,10 +61,6 @@ export default function CarSelector({
     setShowDropdown(true);
   };
 
-  const handleBlur = () => {
-    setTimeout(() => setShowDropdown(false), 200);
-  };
-
   return (
     <div className="car-selector">
       <label>Автомобиль:</label>
@@ -65,7 +70,7 @@ export default function CarSelector({
           value={inputValue}
           onChange={handleInputChange}
           onFocus={handleFocus}
-          onBlur={handleBlur}
+          onBlur={handleInputBlur}
           placeholder="Введите марку и модель автомобиля"
           required={required}
           className="car-input"
@@ -75,14 +80,56 @@ export default function CarSelector({
             {filteredCars.map((car, index) => (
               <div
                 key={`${car}-${index}`}
-                className="car-option"
-                onMouseDown={() => handleCarSelect(car)}
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleCarSelect(car);
+                }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '10px 12px',
+                  cursor: 'pointer',
+                  borderBottom: '1px solid var(--border-color)',
+                  transition: 'background-color 0.2s ease',
+                  color: 'var(--text-primary)',
+                  fontSize: '14px',
+                  minHeight: '44px'
+                }}
               >
-                <span className="car-name">{car}</span>
+                <span style={{ 
+                  flex: 1, 
+                  textAlign: 'left',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                  marginRight: '8px'
+                }}>{car}</span>
                 <button
-                  className="remove-car-btn"
-                  onClick={(e) => handleRemoveCar(car, e)}
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleRemoveCar(car, e);
+                  }}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }}
                   title="Удалить из истории"
+                  type="button"
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: '#ef4444',
+                    fontSize: '14px',
+                    cursor: 'pointer',
+                    padding: '2px 6px',
+                    borderRadius: '4px',
+                    flexShrink: 0,
+                    transition: 'all 0.2s ease',
+                    opacity: '0.6'
+                  }}
                 >
                   ✕
                 </button>
