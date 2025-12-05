@@ -2,7 +2,7 @@ import './App.css';
 import { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 import RecordList from './components/RecordList';
-import CreateCard from  './components/RecordForm';
+import RecordForm from  './components/RecordForm';
 import Modal from './components/Modal';
 import EditForm from './components/EditForm';
 import DeleteForm from './components/DeleteForm';
@@ -203,6 +203,50 @@ function App() {
     if (!modal) return;
     const { type, record } = modal;
 
+    if (type === 'create') {
+      // Resolve client data (similar to RecordForm logic)
+      const clientName = (data.client || '').trim();
+      let finalClientData = { id: clientName, name: clientName };
+      
+      if (clientName) {
+        const { getUsers, findOrCreateClient } = require('./store/dataStore');
+        const clients = getUsers().filter(u => u.role === 'client');
+        const existingClient = clients.find(c => 
+          c.name.toLowerCase() === clientName.toLowerCase()
+        );
+        
+        if (!existingClient) {
+          const newClient = findOrCreateClient(clientName);
+          if (newClient) {
+            finalClientData = { id: newClient.id, name: newClient.name };
+          }
+        } else {
+          finalClientData = { id: existingClient.id, name: existingClient.name };
+        }
+      }
+
+      const newRecord = {
+        id: Date.now(),
+        client: finalClientData.id,
+        clientName: finalClientData.name,
+        car: data.car,
+        service: data.service,
+        price: Number(data.price) || 0,
+        date: data.date,
+        master: data.master,
+        payment_status: normalizeStatus(data.payment_status || 'Pending')
+      };
+      
+      // Add car to history
+      if (data.car && data.car.trim()) {
+        const { addCarToHistory } = require('./store/dataStore');
+        addCarToHistory(data.car.trim());
+      }
+      
+      // Добавляем новую запись в начало списка
+      setRecords(prev => [newRecord, ...prev]);
+    }
+
     if (type === 'edit') {
       const updated = {
         ...record,
@@ -212,6 +256,7 @@ function App() {
         service: data.service,
         price: Number(data.price) || 0,
         date: data.date,
+        master: data.master,
         payment_status: normalizeStatus(data.payment_status)
       };
       
@@ -353,8 +398,8 @@ function App() {
         )}
 
         {modal && modal.type === 'create' && (
-          <Modal title="Создать запись" onCancel={closeModal}>
-            <CreateCard onAdd={(fd) => { addRecord(fd); closeModal(); }} onClose={closeModal} />
+          <Modal title="Создать запись" onCancel={closeModal} onConfirm={() => handleModalConfirm(modal.formData)} confirmLabel="Создать">
+            <RecordForm onChange={(fd) => { modal.formData = fd; }} />
           </Modal>
         )}
       </div>
