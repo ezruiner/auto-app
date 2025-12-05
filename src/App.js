@@ -386,7 +386,13 @@ function App() {
         )}
 
         {modal && modal.type === 'delete' && (
-          <Modal title="Причина удаления" onCancel={closeModal} onConfirm={() => handleModalConfirm(modal.formData)} confirmLabel="Удалить">
+          <Modal 
+            title="Причина удаления" 
+            onCancel={closeModal} 
+            onConfirm={() => handleModalConfirm(modal.formData)} 
+            confirmLabel="Удалить"
+            disabled={!modal.formData?.reason?.trim() || !modal.formData}
+          >
             <DeleteForm initial={modal.record} onChange={(fd) => { modal.formData = fd; }} />
           </Modal>
         )}

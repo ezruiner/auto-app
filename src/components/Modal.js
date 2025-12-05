@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-export default function Modal({ title, children, onCancel, onConfirm, confirmLabel = 'OK' }) {
+export default function Modal({ title, children, onCancel, onConfirm, confirmLabel = 'OK', disabled = false }) {
   const [isClosing, setIsClosing] = useState(false);
 
   // Обработчик нажатия Escape
@@ -30,7 +30,7 @@ export default function Modal({ title, children, onCancel, onConfirm, confirmLab
 
   // Функция подтверждения с анимацией
   const handleConfirm = () => {
-    if (isClosing) return;
+    if (isClosing || disabled) return;
     
     setIsClosing(true);
     
@@ -59,7 +59,7 @@ export default function Modal({ title, children, onCancel, onConfirm, confirmLab
         <div className="modal-body">{children}</div>
         <div className="modal-actions">
           <button className="btn" onClick={handleClose}>Отмена</button>
-          {onConfirm && <button className="btn primary" onClick={handleConfirm}>{confirmLabel}</button>}
+          {onConfirm && <button className="btn primary" onClick={handleConfirm} disabled={disabled}>{confirmLabel}</button>}
         </div>
       </div>
     </div>

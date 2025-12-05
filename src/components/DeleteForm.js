@@ -11,9 +11,7 @@ export default function DeleteForm({ initial = {}, onChange }) {
 
   return (
     <div className="modal-form">
-      <label>Причина удаления (обязательно)
-        <textarea value={reason} onChange={e=>setReason(e.target.value)} />
-      </label>
+      <textarea value={reason} onChange={e=>setReason(e.target.value)} />
     </div>
   );
 }
