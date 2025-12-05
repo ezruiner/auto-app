@@ -45,7 +45,7 @@ export default function ClientSelector({
 
   const handleBlur = () => {
     // Задержка для обработки клика по элементу выпадающего списка
-    setTimeout(() => setShowDropdown(false), 200);
+    setTimeout(() => setShowDropdown(false), 0);
   };
 
   return (

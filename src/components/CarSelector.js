@@ -35,7 +35,7 @@ export default function CarSelector({
   };
 
   const handleInputBlur = () => {
-    setTimeout(() => setShowDropdown(false), 200);
+    setTimeout(() => setShowDropdown(false), 0);
     // Логика добавления в историю перенесена в формы для добавления только при успешном сохранении
   };
 
