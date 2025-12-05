@@ -1389,7 +1389,9 @@ textarea:focus {
   align-items: center;
   justify-content: center;
   min-width: 20px;
+  max-width: 20px;
   min-height: 20px;
+  max-height: 20px;
   flex-shrink: 0;
 }
 
