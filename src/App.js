@@ -10,7 +10,7 @@ import ConfirmForm from './components/ConfirmForm';
 import ThemeToggle from './components/ThemeToggle';
 import AdminPanel from './components/AdminPanel';
 import { getRecordCards } from './service/api';
-import { getUsers, getServices, getMasters } from './store/dataStore';
+import { getUsers, getServices, getMasters, addCarToHistory } from './store/dataStore';
 
 function Navigation({ onOpenCreate, onToggleDisco, discoMode, showDiscoButton, isMobile }) {
   return (
@@ -214,6 +214,12 @@ function App() {
         date: data.date,
         payment_status: normalizeStatus(data.payment_status)
       };
+      
+      // Добавляем автомобиль в историю только при успешном сохранении
+      if (data.car && data.car.trim()) {
+        addCarToHistory(data.car.trim());
+      }
+      
       setRecords(prev => prev.map(r => (String(r.id) === String(record.id) ? updated : r)));
     }
 

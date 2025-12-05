@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Car Selector Styles</title>
+    <style>
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8f9fa;
+            --text-primary: #1a1a1a;
+            --border-color: #e5e7eb;
+        }
+        
+        body {
+            font-family: sans-serif;
+            font-size: 18px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            padding: 20px;
+        }
+        
+        .test-container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+        
+        .car-option {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+            padding: 10px 12px;
+            cursor: pointer;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-primary);
+            font-size: 14px;
+            min-height: 44px;
+            white-space: nowrap !important;
+            flex-wrap: nowrap !important;
+        }
+        
+        .car-name {
+            flex: 1 !important;
+            text-align: left !important;
+            align-self: center !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+        }
+        
+        .remove-car-btn {
+            background: none;
+            border: none;
+            color: #ef4444;
+            font-size: 14px;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin-left: auto;
+            flex-shrink: 0 !important;
+            white-space: nowrap !important;
+        }
+        
+        h1 {
+            text-align: center;
+            color: var(--text-primary);
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>Тест выравнивания CarSelector</h1>
+        
+        <div class="car-option">
+            <span class="car-name">Toyota Camry 2020</span>
+            <button class="remove-car-btn">✕</button>
+        </div>
+        <div class="car-option">
+            <span class="car-name">BMW X5 M Sport Long Name Test for Overflow Handling</span>
+            <button class="remove-car-btn">✕</button>
+        </div>
+        <div class="car-option">
+            <span class="car-name">Audi A4</span>
+            <button class="remove-car-btn">✕</button>
+        </div>
+        <div class="car-option">
+            <span class="car-name">Mercedes-Benz C-Class AMG Line</span>
+            <button class="remove-car-btn">✕</button>
+        </div>
+        
+        <div style="margin-top: 20px; padding: 10px; background: #f0f9ff; border-radius: 4px;">
+            <h3>Результат:</h3>
+            <p>✅ Название слева, кнопка справа на одной строке</p>
+            <p>✅ Длинные названия обрезаются с многоточием</p>
+        </div>
+    </div>
+</body>
+</html>

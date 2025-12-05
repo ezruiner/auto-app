@@ -1350,9 +1350,9 @@ textarea:focus {
 }
 
 .car-option {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
   padding: 10px 12px;
   cursor: pointer;
   border-bottom: 1px solid var(--border-color);
@@ -1360,6 +1360,8 @@ textarea:focus {
   color: var(--text-primary);
   font-size: 14px;
   min-height: 44px; /* Минимальная высота для удобства клика */
+  white-space: nowrap !important;
+  flex-wrap: nowrap !important;
 }
 
 .car-option:hover {
@@ -1370,9 +1372,7 @@ textarea:focus {
   border-bottom: none;
 }
 
-.car-name {
-  flex: 1;
-}
+/* Duplicated definition removed - see below */
 
 .remove-car-btn {
   background: none;
@@ -1380,35 +1380,41 @@ textarea:focus {
   color: #ef4444;
   font-size: 14px;
   cursor: pointer;
-  padding: 2px 6px;
+  padding: 4px 8px;
   border-radius: 4px;
   margin-left: 8px;
   transition: all 0.2s ease;
   opacity: 0.6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  min-height: 20px;
+  flex-shrink: 0;
 }
 
 .remove-car-btn:hover {
   background: rgba(239, 68, 68, 0.1);
   opacity: 1;
-  transform: scale(1.1);
+  transform: scale(1.05);
 }
 
-/* Force button to stay on the right side */
+/* Ensure button stays on the right side and doesn't wrap */
 .car-option .remove-car-btn {
-  flex-shrink: 0;
   margin-left: auto;
+  flex-shrink: 0 !important;
+  white-space: nowrap !important;
 }
 
-/* Ensure proper flex layout for car options */
-.car-option {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: space-between !important;
-}
+/* Prevent text wrapping in car options - merged above */
 
 .car-name {
   flex: 1 !important;
-  text-align: left;
+  text-align: left !important;
+  align-self: center !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
 }
 
 .new-car-hint {

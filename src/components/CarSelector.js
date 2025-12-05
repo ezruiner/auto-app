@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getCarHistory, removeCarFromHistory, addCarToHistory } from '../store/dataStore';
+import { getCarHistory, removeCarFromHistory } from '../store/dataStore';
 
 export default function CarSelector({ 
   value = '', 
@@ -36,10 +36,7 @@ export default function CarSelector({
 
   const handleInputBlur = () => {
     setTimeout(() => setShowDropdown(false), 200);
-    // Add to history only when user finishes typing (after blur)
-    if (inputValue && inputValue.trim()) {
-      addCarToHistory(inputValue.trim());
-    }
+    // Логика добавления в историю перенесена в формы для добавления только при успешном сохранении
   };
 
   const handleCarSelect = (car) => {
@@ -80,32 +77,14 @@ export default function CarSelector({
             {filteredCars.map((car, index) => (
               <div
                 key={`${car}-${index}`}
+                className="car-option"
                 onMouseDown={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
                   handleCarSelect(car);
                 }}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  padding: '10px 12px',
-                  cursor: 'pointer',
-                  borderBottom: '1px solid var(--border-color)',
-                  transition: 'background-color 0.2s ease',
-                  color: 'var(--text-primary)',
-                  fontSize: '14px',
-                  minHeight: '44px'
-                }}
               >
-                <span style={{ 
-                  flex: 1, 
-                  textAlign: 'left',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                  marginRight: '8px'
-                }}>{car}</span>
+                <span className="car-name">{car}</span>
                 <button
                   onMouseDown={(e) => {
                     e.preventDefault();
@@ -118,18 +97,7 @@ export default function CarSelector({
                   }}
                   title="Удалить из истории"
                   type="button"
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    color: '#ef4444',
-                    fontSize: '14px',
-                    cursor: 'pointer',
-                    padding: '2px 6px',
-                    borderRadius: '4px',
-                    flexShrink: 0,
-                    transition: 'all 0.2s ease',
-                    opacity: '0.6'
-                  }}
+                  className="remove-car-btn"
                 >
                   ✕
                 </button>

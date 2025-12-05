@@ -95,6 +95,11 @@ export default function CreateCard({ onAdd, onClose }) {
 
     if (onAdd) onAdd(updatedFormData);
 
+    // Добавляем автомобиль в историю только при успешном создании записи
+    if (formData.car && formData.car.trim()) {
+      addCarToHistory(formData.car.trim());
+    }
+
     setResult('Запись успешно создана!');
     // очистим форму и перейдём к списку
     setFormData({ client: '', car: '', service: '', price: '', date: '', payment_status: 'Pending', master: '' });
