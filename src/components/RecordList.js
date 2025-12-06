@@ -1,12 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
 import Card from './Card';
 
-export default function RecordList({ records, onEdit, onDelete, onConfirm, users = [], services = [] }) {
-  const [status, setStatus] = useState('all');
-  const [dateFilter, setDateFilter] = useState('');
-  const [masterFilter, setMasterFilter] = useState('all');
-  const [showFilters, setShowFilters] = useState(false);
+export default function RecordList({ records, onEdit, onDelete, onConfirm, users = [], services = [], filters = {}, onFiltersChange = () => {} }) {
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
   const filterRef = useRef(null);
+  
+  const status = filters.status || 'all';
+  const dateFilter = filters.date || '';
+  const masterFilter = filters.master || 'all';
 
   const masters = users.filter(u => u.role === 'master');
 
@@ -14,15 +15,15 @@ export default function RecordList({ records, onEdit, onDelete, onConfirm, users
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (filterRef.current && !filterRef.current.contains(event.target)) {
-        setShowFilters(false);
+        setShowMobileFilters(false);
       }
     };
 
-    if (showFilters) {
+    if (showMobileFilters) {
       document.addEventListener('mousedown', handleClickOutside);
       return () => document.removeEventListener('mousedown', handleClickOutside);
     }
-  }, [showFilters]);
+  }, [showMobileFilters]);
 
   const sameDay = (recordDate, ymd) => {
     if (!ymd) return true;
@@ -90,22 +91,23 @@ export default function RecordList({ records, onEdit, onDelete, onConfirm, users
 
   return (
     <div>
-      <h2 className="page-title">Записи</h2>
-
       <div className="filter-compact" ref={filterRef}>
         <button 
           className="btn filter-toggle"
-          onClick={() => setShowFilters(!showFilters)}
+          onClick={() => setShowMobileFilters(!showMobileFilters)}
           title="Показать/скрыть фильтры"
         >
           🔍 Фильтры
         </button>
         
-        {showFilters && (
+        {showMobileFilters && (
           <div className="filter-dropdown" onClick={(e) => e.stopPropagation()}>
             <div className="filter-item">
               <label>Статус</label>
-              <select value={status} onChange={e => setStatus(e.target.value)}>
+              <select 
+                value={status} 
+                onChange={e => onFiltersChange({ ...filters, status: e.target.value })}
+              >
                 <option value="all">Все статусы</option>
                 <option value="in-progress">В работе</option>
                 <option value="completed">Выполнено</option>
@@ -114,11 +116,18 @@ export default function RecordList({ records, onEdit, onDelete, onConfirm, users
             </div>
             <div className="filter-item">
               <label>Дата</label>
-              <input type="date" value={dateFilter} onChange={e => setDateFilter(e.target.value)} />
+              <input 
+                type="date" 
+                value={dateFilter} 
+                onChange={e => onFiltersChange({ ...filters, date: e.target.value })} 
+              />
             </div>
             <div className="filter-item">
               <label>Мастер</label>
-              <select value={masterFilter} onChange={e => setMasterFilter(e.target.value)}>
+              <select 
+                value={masterFilter} 
+                onChange={e => onFiltersChange({ ...filters, master: e.target.value })}
+              >
                 <option value="all">Все мастера</option>
                 {masters.map(m => (
                   <option key={m.id} value={(m.name || m.id).toString()}>{m.name}</option>

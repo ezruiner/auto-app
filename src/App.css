@@ -152,7 +152,6 @@ nav a:hover, nav button:hover {
   align-items: center;
   gap: 16px;
   flex-wrap: wrap;
-  margin-top: -20px;
 }
 
 .list-header h2 {
@@ -1584,6 +1583,7 @@ table tbody tr:hover {
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   gap: 12px;
   margin-bottom: 24px;
+  margin-top: -46px;
 }
 
 .stat-card .panel-body {
@@ -2194,7 +2194,7 @@ textarea:focus {
 
 
 .page-title {
-  margin: 0 0 16px 0;
+  margin: 21px 0 21px 0;
   font-size: 28px;
   font-weight: 700;
 }
@@ -2284,49 +2284,7 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator {
 }
 
 
-/* === Compact Filter UI === */
-.filter-compact {
-  position: relative;
-  margin-bottom: 20px;
-  max-width: 120px;
-}
 
-.filter-toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 16px;
-  background: var(--bg-primary);
-  border: 2px solid var(--border-color);
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--text-primary);
-  transition: all 0.2s ease;
-}
-
-.filter-toggle:hover {
-  background: var(--bg-primary);
-  border-color: var(--text-secondary);
-}
-
-.filter-dropdown {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  background: var(--bg-primary);
-  border: 2px solid var(--border-color);
-  border-radius: 8px;
-  padding: 16px;
-  margin-top: 8px;
-  min-width: 300px !important;
-  box-shadow: var(--shadow-lg);
-  z-index: 100;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
 
 .filter-item {
   display: flex;
@@ -2367,5 +2325,160 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator {
     width: 100%;
     left: 0;
     right: 0;
+  }
+}
+
+/* === Filter Toggle Button === */
+.filter-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.filter-toggle:hover {
+  background: var(--bg-secondary);
+  border-color: #b0b0b0;
+}
+
+/* === Filter Dropdown === */
+.filter-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 8px;
+  min-width: 280px;
+  box-shadow: var(--shadow-lg);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* === Desktop/Mobile Filter Toggle === */
+.filter-compact {
+  display: none;
+  position: relative;
+  max-width: 120px;
+}
+
+@media (max-width: 768px) {
+  .filter-compact {
+    display: block;
+    margin-bottom: 16px;
+  }
+}
+
+@media (min-width: 769px) {
+  .filter-compact {
+    display: none !important;
+  }
+}
+
+
+
+
+/* === Navigation Filters === */
+.nav-filters {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.nav-filters .filter-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+}
+
+.nav-filters .filter-dropdown.mobile {
+  position: fixed;
+  top: auto;
+  bottom: 100px;
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%);
+  width: 90%;
+  max-width: 400px;
+  min-width: auto;
+}
+
+.nav-filters .filter-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.nav-filters .filter-item label {
+  font-weight: 500;
+  color: var(--text-primary);
+  font-size: 14px;
+}
+
+.nav-filters .filter-item input,
+.nav-filters .filter-item select {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font-size: 14px;
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+
+.nav-filters .filter-item input:focus,
+.nav-filters .filter-item select:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);
+  background: var(--bg-primary);
+}
+
+@media (max-width: 768px) {
+  .nav-filters {
+    order: -1;
+    width: 100%;
+  }
+
+  .nav-filters .filter-toggle {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .nav-filters .filter-dropdown {
+    position: fixed;
+    top: auto;
+    bottom: 100px;
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 400px;
+    min-width: auto;
+  }
+
+  nav {
+    flex-wrap: wrap;
+  }
+
+  .nav-left,
+  .nav-right {
+    width: 100%;
+    justify-content: center;
   }
 }

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { getOperators, getShifts, openShift, closeShift, getCurrentShift, cleanupOrphanedShifts, updateShift, reopenShift, addMinutesToDate } from '../store/dataStore';
 import Modal from './Modal';
 
-export default function ShiftsManagement() {
+export default function ShiftsManagement({ filters = {}, onFiltersChange = () => {} }) {
   const [operators, setOperators] = useState([]);
   const [shifts, setShifts] = useState([]);
   const [modal, setModal] = useState(null);
@@ -12,11 +12,12 @@ export default function ShiftsManagement() {
   const [editOpenedAt, setEditOpenedAt] = useState('');
   const [editClosedAt, setEditClosedAt] = useState('');
   const [editNotes, setEditNotes] = useState('');
-  const [operatorFilter, setOperatorFilter] = useState('all');
-  const [dateStart, setDateStart] = useState('');
-  const [dateEnd, setDateEnd] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const filterRef = useRef(null);
+  
+  const operatorFilter = filters.operator || 'all';
+  const dateStart = filters.dateStart || '';
+  const dateEnd = filters.dateEnd || '';
 
   useEffect(() => {
     // Clean up any orphaned shifts on component load
@@ -210,7 +211,7 @@ export default function ShiftsManagement() {
     <div>
       <h2 className="page-title">Управление сменами</h2>
 
-      <div className="stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '12px', marginBottom: '16px' }}>
+      <div className="stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '12px', marginBottom: '16px', marginTop: '-12px' }}>
         <div className="panel stat-card"><div className="panel-body"><div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Всего смен</div><div style={{ fontSize: '24px', fontWeight: 700 }}>{stats.total}</div></div></div>
         <div className="panel stat-card"><div className="panel-body"><div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Активных смен</div><div style={{ fontSize: '24px', fontWeight: 700 }}>{stats.active}</div></div></div>
         <div className="panel stat-card"><div className="panel-body"><div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Отработано часов</div><div style={{ fontSize: '24px', fontWeight: 700 }}>{stats.hours}</div></div></div>
@@ -233,7 +234,7 @@ export default function ShiftsManagement() {
               <select 
                 className="filter-select" 
                 value={operatorFilter} 
-                onChange={e => setOperatorFilter(e.target.value)}
+                onChange={e => onFiltersChange({ ...filters, operator: e.target.value })}
                 aria-label="Фильтр по оператору"
               >
                 <option value="all">Все операторы</option>
@@ -248,7 +249,7 @@ export default function ShiftsManagement() {
                 type="date" 
                 className="filter-input" 
                 value={dateStart} 
-                onChange={e => setDateStart(e.target.value)} 
+                onChange={e => onFiltersChange({ ...filters, dateStart: e.target.value })} 
                 aria-label="Дата начала"
               />
             </div>
@@ -258,7 +259,7 @@ export default function ShiftsManagement() {
                 type="date" 
                 className="filter-input" 
                 value={dateEnd} 
-                onChange={e => setDateEnd(e.target.value)} 
+                onChange={e => onFiltersChange({ ...filters, dateEnd: e.target.value })} 
                 aria-label="Дата окончания"
               />
             </div>
@@ -369,13 +370,13 @@ export default function ShiftsManagement() {
                         </button>
                       ) : (
                         <>
-                          {/* Проверяем, есть ли более новая смена для этого оператора */}
-                          {shifts.some(s => s.operatorId === operator?.id && new Date(s.openedAt) > new Date(shift.openedAt)) ? (
+                          {/* Проверяем, существует ли оператор или есть ли более новая смена */}
+                          {!operator || shifts.some(s => s.operatorId === operator?.id && new Date(s.openedAt) > new Date(shift.openedAt)) ? (
                             <button
                               className="btn disabled small"
                               disabled
                               style={{ padding: '4px 8px', fontSize: '12px', opacity: 0.5, cursor: 'not-allowed' }}
-                              title="Нельзя редактировать закрытую смену, если есть более новая смена"
+                              title={!operator ? 'Оператор удалён или его роль изменена' : 'Нельзя редактировать закрытую смену, если есть более новая смена'}
                             >
                               Заблокирована
                             </button>
@@ -418,13 +419,13 @@ export default function ShiftsManagement() {
                     </button>
                   ) : (
                     <>
-                      {/* Проверяем, есть ли более новая смена для этого оператора */}
-                      {shifts.some(s => s.operatorId === operator?.id && new Date(s.openedAt) > new Date(shift.openedAt)) ? (
+                      {/* Проверяем, существует ли оператор или есть ли более новая смена */}
+                      {!operator || shifts.some(s => s.operatorId === operator?.id && new Date(s.openedAt) > new Date(shift.openedAt)) ? (
                         <button
                           className="btn disabled small"
                           disabled
                           style={{ padding: '4px 8px', fontSize: '12px', opacity: 0.5, cursor: 'not-allowed' }}
-                          title="Нельзя редактировать закрытую смену, если есть более новая смена"
+                          title={!operator ? 'Оператор удалён или его роль изменена' : 'Нельзя редактировать закрытую смену, если есть более новая смена'}
                         >
                           Заблокирована
                         </button>

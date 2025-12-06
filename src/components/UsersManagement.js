@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { getUsers, getServices, addUser, updateUser, deleteUser } from '../store/dataStore';
 import Modal from './Modal';
 
-export default function UsersManagement() {
+export default function UsersManagement({ filters = {}, onFiltersChange = () => {} }) {
   const [users, setUsers] = useState([]);
   const [services, setServices] = useState([]);
   const [modal, setModal] = useState(null);
@@ -11,10 +11,11 @@ export default function UsersManagement() {
     role: 'client',
     services: []
   });
-  const [search, setSearch] = useState('');
-  const [roleFilter, setRoleFilter] = useState('all');
   const [showFilters, setShowFilters] = useState(false);
   const filterRef = useRef(null);
+  
+  const search = filters.search || '';
+  const roleFilter = filters.role || 'all';
 
   useEffect(() => {
     setUsers(getUsers());
@@ -90,12 +91,12 @@ export default function UsersManagement() {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h2>Управление пользователями</h2>
         <button className="btn primary" onClick={handleAdd}>+ Добавить пользователя</button>
       </div>
 
-      <div className="stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '12px', marginBottom: '16px' }}>
+      <div className="stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '12px', marginBottom: '16px', marginTop: '-14px' }}>
         <div className="panel stat-card"><div className="panel-body"><div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Всего пользователей</div><div style={{ fontSize: '24px', fontWeight: 700 }}>{total}</div></div></div>
         <div className="panel stat-card"><div className="panel-body"><div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Операторов</div><div style={{ fontSize: '24px', fontWeight: 700 }}>{operators}</div></div></div>
         <div className="panel stat-card"><div className="panel-body"><div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Мастеров</div><div style={{ fontSize: '24px', fontWeight: 700 }}>{masters}</div></div></div>
@@ -118,7 +119,7 @@ export default function UsersManagement() {
               <input 
                 className="filter-input" 
                 value={search} 
-                onChange={e => setSearch(e.target.value)} 
+                onChange={e => onFiltersChange({ ...filters, search: e.target.value })} 
                 placeholder="Поиск по имени" 
                 aria-label="Поиск по имени пользователя" 
                 role="searchbox"
@@ -129,7 +130,7 @@ export default function UsersManagement() {
               <select 
                 className="filter-select" 
                 value={roleFilter} 
-                onChange={e => setRoleFilter(e.target.value)}
+                onChange={e => onFiltersChange({ ...filters, role: e.target.value })}
                 aria-label="Фильтр по роли"
               >
                 <option value="all">Все роли</option>

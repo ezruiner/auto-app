@@ -1,5 +1,5 @@
 import './App.css';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 import RecordList from './components/RecordList';
 import RecordForm from  './components/RecordForm';
@@ -15,7 +15,24 @@ import UsersManagement from './components/UsersManagement';
 import { getRecordCards } from './service/api';
 import { getUsers, getServices, getMasters, addCarToHistory } from './store/dataStore';
 
-function Navigation({ onOpenCreate }) {
+function Navigation({ onOpenCreate, recordFilters, onRecordFiltersChange, isMobile, currentPage, pageFilters, onPageFiltersChange }) {
+  const [showFilters, setShowFilters] = useState(false);
+  const filterRef = useRef(null);
+  const location = useLocation();
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (filterRef.current && !filterRef.current.contains(event.target)) {
+        setShowFilters(false);
+      }
+    };
+
+    if (showFilters) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [showFilters]);
+
   return (
     <nav>
       <div className="nav-left">
@@ -25,6 +42,135 @@ function Navigation({ onOpenCreate }) {
         <Link to="/services" className="btn">Услуги</Link>
       </div>
       <div className="nav-right">
+        {(location.pathname === '/' || location.pathname === '/records') && (
+          <div className="nav-filters" ref={filterRef} style={{ position: 'relative' }}>
+            <button 
+              className="btn filter-toggle"
+              onClick={() => setShowFilters(!showFilters)}
+              title="Показать/скрыть фильтры"
+            >
+              🔍 Фильтры
+            </button>
+            
+            {showFilters && (
+              <div className={`filter-dropdown ${isMobile ? 'mobile' : ''}`} onClick={(e) => e.stopPropagation()}>
+                <div className="filter-item">
+                  <label>Статус</label>
+                  <select 
+                    value={recordFilters.status} 
+                    onChange={e => onRecordFiltersChange({ ...recordFilters, status: e.target.value })}
+                  >
+                    <option value="all">Все статусы</option>
+                    <option value="in-progress">В работе</option>
+                    <option value="completed">Выполнено</option>
+                    <option value="cancelled">Отменено</option>
+                  </select>
+                </div>
+                <div className="filter-item">
+                  <label>Дата</label>
+                  <input 
+                    type="date" 
+                    value={recordFilters.date} 
+                    onChange={e => onRecordFiltersChange({ ...recordFilters, date: e.target.value })} 
+                  />
+                </div>
+                <div className="filter-item">
+                  <label>Мастер</label>
+                  <select 
+                    value={recordFilters.master} 
+                    onChange={e => onRecordFiltersChange({ ...recordFilters, master: e.target.value })}
+                  >
+                    <option value="all">Все мастера</option>
+                    {recordFilters.masters?.map(m => (
+                      <option key={m.id} value={(m.name || m.id).toString()}>{m.name}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+        {location.pathname === '/users' && (
+          <div className="nav-filters" ref={filterRef} style={{ position: 'relative' }}>
+            <button 
+              className="btn filter-toggle"
+              onClick={() => setShowFilters(!showFilters)}
+              title="Показать/скрыть фильтры"
+            >
+              🔍 Фильтры
+            </button>
+            
+            {showFilters && (
+              <div className={`filter-dropdown ${isMobile ? 'mobile' : ''}`} onClick={(e) => e.stopPropagation()}>
+                <div className="filter-item">
+                  <label>Поиск</label>
+                  <input 
+                    type="text"
+                    value={pageFilters.search || ''} 
+                    onChange={e => onPageFiltersChange({ ...pageFilters, search: e.target.value })}
+                    placeholder="Поиск по имени"
+                  />
+                </div>
+                <div className="filter-item">
+                  <label>Роль</label>
+                  <select 
+                    value={pageFilters.role || 'all'} 
+                    onChange={e => onPageFiltersChange({ ...pageFilters, role: e.target.value })}
+                  >
+                    <option value="all">Все роли</option>
+                    <option value="operator">Оператор</option>
+                    <option value="master">Мастер</option>
+                    <option value="client">Клиент</option>
+                  </select>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+        {location.pathname === '/shifts' && (
+          <div className="nav-filters" ref={filterRef} style={{ position: 'relative' }}>
+            <button 
+              className="btn filter-toggle"
+              onClick={() => setShowFilters(!showFilters)}
+              title="Показать/скрыть фильтры"
+            >
+              🔍 Фильтры
+            </button>
+            
+            {showFilters && (
+              <div className={`filter-dropdown ${isMobile ? 'mobile' : ''}`} onClick={(e) => e.stopPropagation()}>
+                <div className="filter-item">
+                  <label>Оператор</label>
+                  <select 
+                    value={pageFilters.operator || 'all'} 
+                    onChange={e => onPageFiltersChange({ ...pageFilters, operator: e.target.value })}
+                  >
+                    <option value="all">Все операторы</option>
+                    {pageFilters.operators?.map(o => (
+                      <option key={o.id} value={o.id}>{o.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="filter-item">
+                  <label>Дата начала</label>
+                  <input 
+                    type="date" 
+                    value={pageFilters.dateStart || ''} 
+                    onChange={e => onPageFiltersChange({ ...pageFilters, dateStart: e.target.value })}
+                  />
+                </div>
+                <div className="filter-item">
+                  <label>Дата окончания</label>
+                  <input 
+                    type="date" 
+                    value={pageFilters.dateEnd || ''} 
+                    onChange={e => onPageFiltersChange({ ...pageFilters, dateEnd: e.target.value })}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+        )}
         <button className="btn primary" onClick={() => onOpenCreate()}>+ Добавить запись</button>
         <ThemeToggle />
       </div>
@@ -85,6 +231,20 @@ function App() {
   });
 
   const [isMobile, setIsMobile] = useState(false);
+  const [recordFilters, setRecordFilters] = useState({
+    status: 'all',
+    date: '',
+    master: 'all',
+    masters: []
+  });
+  const [pageFilters, setPageFilters] = useState({
+    search: '',
+    role: 'all',
+    operator: 'all',
+    dateStart: '',
+    dateEnd: '',
+    operators: []
+  });
 
   // детекция мобильного устройства
   useEffect(() => {
@@ -101,6 +261,14 @@ function App() {
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Обновляем список мастеров и операторов в фильтрах
+  useEffect(() => {
+    const masters = getUsers().filter(u => u.role === 'master');
+    const operators = getUsers().filter(u => u.role === 'operator');
+    setRecordFilters(prev => ({ ...prev, masters }));
+    setPageFilters(prev => ({ ...prev, operators }));
   }, []);
 
   // загрузка remote JSON и дополнение state новыми записями (не перезаписываем локальные данные)
@@ -305,7 +473,12 @@ function App() {
     return (
       <div className="app-container">
         <Navigation 
-          onOpenCreate={() => setModal({ type: 'create' })} 
+          onOpenCreate={() => setModal({ type: 'create' })}
+          recordFilters={recordFilters}
+          onRecordFiltersChange={setRecordFilters}
+          isMobile={isMobile}
+          pageFilters={pageFilters}
+          onPageFiltersChange={setPageFilters}
         />
 
         {isMobile && (
@@ -326,6 +499,8 @@ function App() {
                 onConfirm={confirmRecord}
                 users={getUsers()}
                 services={getServices()}
+                filters={recordFilters}
+                onFiltersChange={setRecordFilters}
               />
               {isMobile && onRecordsRoute && (
                 <button className="cache-clear bottom-mobile" onClick={clearCache} title="Очистить кэш" aria-label="Очистить кэш">🗑️</button>
@@ -341,6 +516,8 @@ function App() {
                 onConfirm={confirmRecord}
                 users={getUsers()}
                 services={getServices()}
+                filters={recordFilters}
+                onFiltersChange={setRecordFilters}
               />
               {isMobile && onRecordsRoute && (
                 <button className="cache-clear bottom-mobile" onClick={clearCache} title="Очистить кэш" aria-label="Очистить кэш">🗑️</button>
@@ -348,8 +525,8 @@ function App() {
             </div>
           } />
           <Route path="/services" element={<ServicesManagement />} />
-          <Route path="/users" element={<UsersManagement />} />
-          <Route path="/shifts" element={<ShiftsManagement />} />
+          <Route path="/users" element={<UsersManagement filters={pageFilters} onFiltersChange={setPageFilters} />} />
+          <Route path="/shifts" element={<ShiftsManagement filters={pageFilters} onFiltersChange={setPageFilters} />} />
           <Route path="/admin" element={<AdminPanel />} />
         </Routes>
 
