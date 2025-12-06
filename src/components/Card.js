@@ -9,21 +9,17 @@ const formatPrice = (amount) => {
 export default function Card({ id, client, car, service, price, date, payment_status, payment_amount, payment_comment, cancel_reason, cancelledAt, onEdit, onDelete, onConfirm }) {
   const status = (payment_status || '').toLowerCase();
 
-  let icon = '⏳';
   let cls = 'in-progress';
   let statusLabel = 'В РАБОТЕ';
 
   if (status === 'cancelled' || status === 'canceled' || status === 'cancel' || status === 'отмена') {
-    icon = '✕';
     cls = 'cancelled';
     statusLabel = 'ОТМЕНЕНО';
   } else if (status === 'completed' || status === 'done' || status === 'проведена') {
-    icon = '✓';
     cls = 'completed';
     statusLabel = 'ВЫПОЛНЕНО';
   } else {
     // default: in progress / pending
-    icon = '⏳';
     cls = 'in-progress';
     statusLabel = 'В РАБОТЕ';
   }
@@ -31,7 +27,6 @@ export default function Card({ id, client, car, service, price, date, payment_st
   return (
     <div className={`card ${cls}`}>
       <div className="status">
-        <span className={`status-icon ${cls}`}>{icon}</span>
         <span className={`status-badge ${cls}`}>{statusLabel}</span>
       </div>
       <div className="desc">

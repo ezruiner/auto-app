@@ -5,7 +5,7 @@ import MasterSelector from './MasterSelector';
 import ServiceSelector from './ServiceSelector';
 import { getServices, getUsers, getMasters, findOrCreateClient, addCarToHistory } from '../store/dataStore';
 
-export default function RecordForm({ initial = {}, onChange }) {
+export default function RecordForm({ initial = {}, onChange, onFormDataChange }) {
   // Простая форма состояний - каждое поле отдельно
   const [client, setClient] = useState('');
   const [car, setCar] = useState('');
@@ -60,7 +60,7 @@ export default function RecordForm({ initial = {}, onChange }) {
     }
   }, [initial, clients]);
 
-  // Обновляем onChange при любом изменении
+  // Обновляем onFormDataChange при любом изменении
   useEffect(() => {
     // Убеждаемся, что цена всегда соответствует выбранной услуге
     const currentPrice = service ? getServicePrice(service) : price;
@@ -73,8 +73,8 @@ export default function RecordForm({ initial = {}, onChange }) {
       master,
       payment_status: 'Pending' // Автоматически устанавливаем начальный статус
     };
-    onChange && onChange(formData);
-  }, [client, car, service, price, date, master, services, onChange]);
+    onFormDataChange && onFormDataChange(formData);
+  }, [client, car, service, price, date, master, services, onFormDataChange]);
 
   const getServicePrice = (id) => {
     const s = services.find(x => x.id === id);
@@ -149,8 +149,10 @@ export default function RecordForm({ initial = {}, onChange }) {
         required
       />
       
-      <label>Цена
+      <label htmlFor="record-price">Цена
         <input 
+          id="record-price"
+          name="price"
           type="text" 
           value={service ? `${getServicePrice(service)} ₽` : ''} 
           readOnly 
@@ -178,8 +180,9 @@ export default function RecordForm({ initial = {}, onChange }) {
         required
       />
       
-      <label>Дата записи
+      <label htmlFor="record-date">Дата записи
         <input 
+          id="record-date"
           name="date"
           type="date" 
           value={date} 

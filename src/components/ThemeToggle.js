@@ -10,7 +10,13 @@ export default function ThemeToggle() {
     const isDarkMode = saved ? saved === 'dark' : prefersDark;
     
     setIsDark(isDarkMode);
-    applyTheme(isDarkMode);
+    
+    // Apply theme immediately on mount
+    if (isDarkMode) {
+      document.body.classList.add('dark-theme');
+    } else {
+      document.body.classList.remove('dark-theme');
+    }
   }, []);
 
   const applyTheme = (dark) => {

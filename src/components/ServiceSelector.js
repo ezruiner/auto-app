@@ -81,9 +81,11 @@ export default function ServiceSelector({
 
   return (
     <div className="service-selector">
-      <label>Услуга:</label>
+      <label htmlFor="service-input">Услуга:</label>
       <div className="service-input-container">
         <input
+          id="service-input"
+          name="service"
           type="text"
           value={inputValue}
           onChange={handleInputChange}

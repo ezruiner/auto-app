@@ -60,9 +60,11 @@ export default function CarSelector({
 
   return (
     <div className="car-selector">
-      <label>Автомобиль:</label>
+      <label htmlFor="car-input">Автомобиль:</label>
       <div className="car-input-container">
         <input
+          id="car-input"
+          name="car"
           type="text"
           value={inputValue}
           onChange={handleInputChange}

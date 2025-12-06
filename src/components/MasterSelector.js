@@ -65,9 +65,11 @@ export default function MasterSelector({
 
   return (
     <div className="master-selector">
-      <label>Мастер:</label>
+      <label htmlFor="master-input">Мастер:</label>
       <div className="master-input-container">
         <input
+          id="master-input"
+          name="master"
           type="text"
           value={inputValue}
           onChange={handleInputChange}

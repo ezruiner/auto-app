@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-export default function ConfirmForm({ initial = {}, onChange }) {
+export default function ConfirmForm({ initial = {}, onChange, onFormDataChange }) {
   const [amount, setAmount] = useState('');
   const [comment, setComment] = useState('');
 
@@ -11,12 +11,15 @@ export default function ConfirmForm({ initial = {}, onChange }) {
     }
   }, [initial]);
 
-  useEffect(() => onChange && onChange({ amount, comment }), [amount, comment]);
+  useEffect(() => {
+    const formData = { amount, comment };
+    onFormDataChange && onFormDataChange(formData);
+  }, [amount, comment, onFormDataChange]);
 
   return (
     <div className="modal-form">
-      <label>Сумма оплаты<input type="number" value={amount} onChange={e=>setAmount(e.target.value)} /></label>
-      <label>Комментарий<textarea value={comment} onChange={e=>setComment(e.target.value)} /></label>
+      <label htmlFor="confirm-amount">Сумма оплаты<input id="confirm-amount" name="amount" type="number" value={amount} onChange={e=>setAmount(e.target.value)} /></label>
+      <label htmlFor="confirm-comment">Комментарий<textarea id="confirm-comment" name="comment" value={comment} onChange={e=>setComment(e.target.value)} /></label>
     </div>
   );
 }

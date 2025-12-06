@@ -5,7 +5,7 @@ import CarSelector from './CarSelector';
 import MasterSelector from './MasterSelector';
 import ServiceSelector from './ServiceSelector';
 
-export default function EditForm({ initial = {}, onChange }) {
+export default function EditForm({ initial = {}, onChange, onFormDataChange }) {
   const [form, setForm] = useState({
     client: '', car: '', service: '', price: '', date: '', payment_status: '', master: ''
   });
@@ -65,8 +65,11 @@ export default function EditForm({ initial = {}, onChange }) {
         formData.price = selected.price;
       }
     }
-    onChange && onChange(formData);
-  }, [form, services, onChange]);
+    // Передаем данные в Modal через onFormDataChange
+    if (onFormDataChange) {
+      onFormDataChange(formData);
+    }
+  }, [form, services, onFormDataChange]);
 
   const statusOptions = [
     { value: 'in-progress', label: 'В работе' },
@@ -109,8 +112,10 @@ export default function EditForm({ initial = {}, onChange }) {
         }}
         required
       />
-      <label>Цена
+      <label htmlFor="edit-price">Цена
         <input
+          id="edit-price"
+          name="price"
           type="text"
           value={form.service ? `${getServicePrice(form.service)} ₽` : (form.price ? `${form.price} ₽` : '')}
           readOnly
@@ -130,15 +135,15 @@ export default function EditForm({ initial = {}, onChange }) {
           }}
         />
       </label>
-      <label>Дата записи<input type="date" value={form.date} onChange={e=>setForm({...form, date: e.target.value})} /></label>
+      <label htmlFor="edit-date">Дата записи<input id="edit-date" name="date" type="date" value={form.date} onChange={e=>setForm({...form, date: e.target.value})} /></label>
       <MasterSelector
         masters={filteredMasters}
         value={form.master}
         onChange={(masterName) => setForm({...form, master: masterName})}
         required
       />
-      <label>Статус
-        <select value={form.payment_status} onChange={e=>setForm({...form, payment_status: e.target.value})}>
+      <label htmlFor="edit-status">Статус
+        <select id="edit-status" name="payment_status" value={form.payment_status} onChange={e=>setForm({...form, payment_status: e.target.value})}>
           {statusOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
         </select>
       </label>

@@ -50,9 +50,11 @@ export default function ClientSelector({
 
   return (
     <div className="client-selector">
-      <label>Клиент:</label>
+      <label htmlFor="client-input">Клиент:</label>
       <div className="client-input-container">
         <input
+          id="client-input"
+          name="client"
           type="text"
           value={inputValue}
           onChange={handleInputChange}

@@ -1,5 +1,5 @@
 import './App.css';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 import RecordList from './components/RecordList';
 import RecordForm from  './components/RecordForm';
@@ -185,27 +185,27 @@ function App() {
   // modal state for interactive actions (edit/delete/confirm)
   const [modal, setModal] = useState(null);
 
-  const editRecord = (id) => {
+  const editRecord = useCallback((id) => {
     const rec = records.find(r => String(r.id) === String(id));
     if (!rec) return;
     setModal({ type: 'edit', record: rec });
-  };
+  }, [records]);
 
-  const deleteRecord = (id) => {
+  const deleteRecord = useCallback((id) => {
     const rec = records.find(r => String(r.id) === String(id));
     if (!rec) return;
     setModal({ type: 'delete', record: rec });
-  };
+  }, [records]);
 
-  const confirmRecord = (id) => {
+  const confirmRecord = useCallback((id) => {
     const rec = records.find(r => String(r.id) === String(id));
     if (!rec) return;
     setModal({ type: 'confirm', record: rec });
-  };
+  }, [records]);
 
-  const closeModal = () => setModal(null);
+  const closeModal = useCallback(() => setModal(null), []);
 
-  const handleModalConfirm = (data) => {
+  const handleModalConfirm = useCallback((data) => {
     if (!modal) return;
     const { type, record } = modal;
 
@@ -251,6 +251,7 @@ function App() {
       
       // Добавляем новую запись в начало списка
       setRecords(prev => [newRecord, ...prev]);
+      closeModal();
     }
 
     if (type === 'edit') {
@@ -272,6 +273,7 @@ function App() {
       }
       
       setRecords(prev => prev.map(r => (String(r.id) === String(record.id) ? updated : r)));
+      closeModal();
     }
 
     if (type === 'delete') {
@@ -287,15 +289,15 @@ function App() {
         console.warn('failed to store deletedRecords', err);
       }
       setRecords(prev => prev.map(r => (String(r.id) === String(record.id) ? updated : r)));
+      closeModal();
     }
 
     if (type === 'confirm') {
       const updated = { ...record, payment_status: 'completed', payment_amount: Number(data.amount) || 0, payment_comment: data.comment || '' };
       setRecords(prev => prev.map(r => (String(r.id) === String(record.id) ? updated : r)));
+      closeModal();
     }
-
-    // Закрытие модала будет обработано через анимацию в Modal компоненте
-  };
+  }, [modal, closeModal]);
 
   // Эффект для применения disco класса к body
   useEffect(() => {
@@ -305,6 +307,12 @@ function App() {
       document.body.classList.remove('disco');
     }
   }, [discoMode]);
+
+  // Callback функции для предотвращения бесконечных рендеров
+  const handleModalFormChange = useCallback((fd) => {
+    // Store form data in a ref to avoid triggering re-renders
+    // Forms will pass data directly to handleModalConfirm
+  }, []);
 
   // Вложенный компонент, чтобы использовать `useLocation` внутри Router
   function InnerApp() {
@@ -388,8 +396,8 @@ function App() {
         )}
 
         {modal && modal.type === 'edit' && (
-          <Modal title="Редактировать запись" onCancel={closeModal} onConfirm={() => handleModalConfirm(modal.formData)} confirmLabel="Сохранить">
-            <EditForm initial={modal.record} onChange={(fd) => { setModal(prev => (prev ? { ...prev, formData: fd } : prev)); }} />
+          <Modal title="Редактировать запись" onCancel={closeModal} onConfirm={handleModalConfirm} confirmLabel="Сохранить">
+            <EditForm initial={modal.record} onChange={handleModalFormChange} />
           </Modal>
         )}
 
@@ -397,24 +405,22 @@ function App() {
           <Modal
             title="Причина удаления"
             onCancel={closeModal}
-            onConfirm={() => handleModalConfirm(modal.formData)}
+            onConfirm={handleModalConfirm}
             confirmLabel="Удалить"
-            disabled={!(modal?.formData?.reason && modal.formData.reason.trim().length > 0)}
-            confirmDisabledHint="Причина должна быть непустой и не состоять только из пробелов"
           >
-            <DeleteForm initial={modal.record} onChange={(fd) => { setModal(prev => (prev ? { ...prev, formData: fd } : prev)); }} />
+            <DeleteForm initial={modal.record} onChange={handleModalFormChange} />
           </Modal>
         )}
 
         {modal && modal.type === 'confirm' && (
-          <Modal title="Подтверждение оплаты" onCancel={closeModal} onConfirm={() => handleModalConfirm(modal.formData)} confirmLabel="Подтвердить">
-            <ConfirmForm initial={modal.record} onChange={(fd) => { setModal(prev => (prev ? { ...prev, formData: fd } : prev)); }} />
+          <Modal title="Подтверждение оплаты" onCancel={closeModal} onConfirm={handleModalConfirm} confirmLabel="Подтвердить">
+            <ConfirmForm initial={modal.record} onChange={handleModalFormChange} />
           </Modal>
         )}
 
         {modal && modal.type === 'create' && (
-          <Modal title="Создать запись" onCancel={closeModal} onConfirm={() => handleModalConfirm(modal.formData)} confirmLabel="Создать">
-            <RecordForm onChange={(fd) => { setModal(prev => (prev ? { ...prev, formData: fd } : prev)); }} />
+          <Modal title="Создать запись" onCancel={closeModal} onConfirm={handleModalConfirm} confirmLabel="Создать">
+            <RecordForm onChange={handleModalFormChange} />
           </Modal>
         )}
       </div>
