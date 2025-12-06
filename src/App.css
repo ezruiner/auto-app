@@ -151,9 +151,8 @@ nav a:hover, nav button:hover {
   justify-content: space-between;
   align-items: center;
   gap: 16px;
-  margin-bottom: 24px;
   flex-wrap: wrap;
-  padding-top: 20px;
+  margin-top: -20px;
 }
 
 .list-header h2 {
@@ -2284,3 +2283,89 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator {
   }
 }
 
+
+/* === Compact Filter UI === */
+.filter-compact {
+  position: relative;
+  margin-bottom: 20px;
+  max-width: 120px;
+}
+
+.filter-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: var(--bg-primary);
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+  transition: all 0.2s ease;
+}
+
+.filter-toggle:hover {
+  background: var(--bg-primary);
+  border-color: var(--text-secondary);
+}
+
+.filter-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: var(--bg-primary);
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 8px;
+  min-width: 300px !important;
+  box-shadow: var(--shadow-lg);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.filter-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.filter-item label {
+  font-weight: 500;
+  color: var(--text-primary);
+  font-size: 14px;
+}
+
+.filter-item input,
+.filter-item select {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font-size: 14px;
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+
+.filter-item input:focus,
+.filter-item select:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);
+  background: var(--bg-primary);
+}
+
+@media (max-width: 768px) {
+  .filter-dropdown {
+    min-width: auto;
+    width: 100%;
+    left: 0;
+    right: 0;
+  }
+}

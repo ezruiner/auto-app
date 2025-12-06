@@ -15,26 +15,24 @@ import UsersManagement from './components/UsersManagement';
 import { getRecordCards } from './service/api';
 import { getUsers, getServices, getMasters, addCarToHistory } from './store/dataStore';
 
-function Navigation({ onOpenCreate, onToggleDisco, discoMode, showDiscoButton }) {
+function Navigation({ onOpenCreate }) {
   return (
     <nav>
       <div className="nav-left">
-        <Link to="/" className="brand">🛠️ Автосервис Pro</Link>
-        <Link to="/records" className="btn">Записи</Link>
-        <Link to="/services" className="btn">Услуги</Link>
+        <Link to="/" className="brand">🛠️ Автосервис Ultra Pro Max</Link>
         <Link to="/users" className="btn">Пользователи</Link>
         <Link to="/shifts" className="btn">Смены</Link>
+        <Link to="/services" className="btn">Услуги</Link>
       </div>
       <div className="nav-right">
         <button className="btn primary" onClick={() => onOpenCreate()}>+ Добавить запись</button>
-        {showDiscoButton && <button className="btn" onClick={onToggleDisco}>{discoMode ? '🎉 Диско ВКЛ' : '🎈 Диско'}</button>}
         <ThemeToggle />
       </div>
     </nav>
   );
 }
 
-function MobileControls({ onToggleDisco, discoMode, showDiscoButton, onOpenCreate }) {
+function MobileControls({ onOpenCreate }) {
   return (
     <div className="mobile-bottom-group" role="navigation" aria-label="Mobile navigation">
       <Link to="/records" className="mbg-btn">📋 Список</Link>
@@ -86,8 +84,6 @@ function App() {
     return [];
   });
 
-  const [discoMode, setDiscoMode] = useState(false);
-  const [showDiscoButton, setShowDiscoButton] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
   // детекция мобильного устройства
@@ -138,27 +134,7 @@ function App() {
     return () => { mounted = false };
   }, []);
 
-  const konamiCode = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65];
-  let keySequence = [];
 
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      keySequence.push(e.keyCode);
-      if (keySequence.length > konamiCode.length) {
-        keySequence.shift();
-      }
-      if (keySequence.join(',') === konamiCode.join(',')) {
-        setShowDiscoButton(prev => !prev);
-        keySequence = [];
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, []);
 
   // сохраняем в localStorage при изменении state — используем сравнение чтобы меньше перезаписывать
   useEffect(() => {
@@ -299,14 +275,7 @@ function App() {
     }
   }, [modal, closeModal]);
 
-  // Эффект для применения disco класса к body
-  useEffect(() => {
-    if (discoMode) {
-      document.body.classList.add('disco');
-    } else {
-      document.body.classList.remove('disco');
-    }
-  }, [discoMode]);
+
 
   // Callback функции для предотвращения бесконечных рендеров
   const handleModalFormChange = useCallback((fd) => {
@@ -337,16 +306,10 @@ function App() {
       <div className="app-container">
         <Navigation 
           onOpenCreate={() => setModal({ type: 'create' })} 
-          onToggleDisco={() => setDiscoMode(!discoMode)} 
-          discoMode={discoMode} 
-          showDiscoButton={!isMobile && showDiscoButton} 
         />
 
         {isMobile && (
           <MobileControls
-            onToggleDisco={() => setDiscoMode(!discoMode)}
-            discoMode={discoMode}
-            showDiscoButton={showDiscoButton}
             onOpenCreate={() => setModal({ type: 'create' })}
           />
         )}

@@ -1,15 +1,16 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import ServicesManagement from './ServicesManagement';
 import UsersManagement from './UsersManagement';
 import ShiftsManagement from './ShiftsManagement';
 
 export default function AdminPanel() {
-  const [activeTab, setActiveTab] = useState('shifts');
+  const isMobile = () => window.innerWidth < 768;
+  const [activeTab, setActiveTab] = useState(isMobile() ? 'users' : 'shifts');
 
   const tabs = [
+    { id: 'users', label: '👥 Пользователи' },
     { id: 'shifts', label: '⏰ Смены' },
     { id: 'services', label: '🔧 Услуги' },
-    { id: 'users', label: '👥 Пользователи' }
   ];
 
   return (

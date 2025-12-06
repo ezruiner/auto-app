@@ -6,7 +6,7 @@ const formatPrice = (amount) => {
   return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 };
 
-export default function Card({ id, client, car, service, price, date, payment_status, payment_amount, payment_comment, cancel_reason, cancelledAt, onEdit, onDelete, onConfirm }) {
+export default function Card({ id, client, car, service, master, price, date, payment_status, payment_amount, payment_comment, cancel_reason, cancelledAt, onEdit, onDelete, onConfirm }) {
   const status = (payment_status || '').toLowerCase();
 
   let cls = 'in-progress';
@@ -33,6 +33,7 @@ export default function Card({ id, client, car, service, price, date, payment_st
         <p className="client">{client}</p>
         <p><span className="label">Автомобиль:</span> {car}</p>
         <p><span className="label">Услуга:</span> {service}</p>
+        <p><span className="label">Мастер:</span> {master}</p>
         <p><span className="label">Дата записи:</span> {date}</p>
         <p><span className="label">К оплате:</span> <strong>{formatPrice(price)} ₽</strong></p>
         {payment_status === 'completed' && (

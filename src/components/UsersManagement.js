@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { getUsers, getServices, addUser, updateUser, deleteUser } from '../store/dataStore';
 import Modal from './Modal';
 
@@ -13,11 +13,27 @@ export default function UsersManagement() {
   });
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
+  const [showFilters, setShowFilters] = useState(false);
+  const filterRef = useRef(null);
 
   useEffect(() => {
     setUsers(getUsers());
     setServices(getServices());
   }, []);
+
+  // Закрытие фильтра при клике вне окна
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (filterRef.current && !filterRef.current.contains(event.target)) {
+        setShowFilters(false);
+      }
+    };
+
+    if (showFilters) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [showFilters]);
 
   const handleAdd = () => {
     setFormData({ name: '', role: 'client', services: [] });
@@ -86,10 +102,18 @@ export default function UsersManagement() {
         <div className="panel stat-card"><div className="panel-body"><div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Клиентов</div><div style={{ fontSize: '24px', fontWeight: 700 }}>{clients}</div></div></div>
       </div>
 
-      <div className="panel filter-panel" role="region" aria-label="Фильтрация пользователей">
-        <div className="panel-body">
-          <div className="filter-grid">
-            <div>
+      <div className="filter-compact" ref={filterRef}>
+        <button 
+          className="btn filter-toggle"
+          onClick={() => setShowFilters(!showFilters)}
+          title="Показать/скрыть фильтры"
+        >
+          🔍 Фильтры
+        </button>
+        
+        {showFilters && (
+          <div className="filter-dropdown" onClick={(e) => e.stopPropagation()}>
+            <div className="filter-item">
               <label>Поиск</label>
               <input 
                 className="filter-input" 
@@ -100,7 +124,7 @@ export default function UsersManagement() {
                 role="searchbox"
               />
             </div>
-            <div>
+            <div className="filter-item">
               <label>Роль</label>
               <select 
                 className="filter-select" 
@@ -114,11 +138,8 @@ export default function UsersManagement() {
                 <option value="client">Клиент</option>
               </select>
             </div>
-            <div className="apply-cell">
-              <button className="btn primary" aria-label="Применить фильтры">Применить</button>
-            </div>
           </div>
-        </div>
+        )}
       </div>
 
       <table style={{ width: '100%', borderCollapse: 'collapse' }}>

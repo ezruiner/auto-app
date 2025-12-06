@@ -1,12 +1,28 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Card from './Card';
 
 export default function RecordList({ records, onEdit, onDelete, onConfirm, users = [], services = [] }) {
   const [status, setStatus] = useState('all');
   const [dateFilter, setDateFilter] = useState('');
   const [masterFilter, setMasterFilter] = useState('all');
+  const [showFilters, setShowFilters] = useState(false);
+  const filterRef = useRef(null);
 
   const masters = users.filter(u => u.role === 'master');
+
+  // Закрытие фильтра при клике вне окна
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (filterRef.current && !filterRef.current.contains(event.target)) {
+        setShowFilters(false);
+      }
+    };
+
+    if (showFilters) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [showFilters]);
 
   const sameDay = (recordDate, ymd) => {
     if (!ymd) return true;
@@ -58,14 +74,36 @@ export default function RecordList({ records, onEdit, onDelete, onConfirm, users
     return serviceDisplay;
   };
 
+  const resolveMaster = (r) => {
+    let masterDisplay = r.master || '';
+    if (r.master && !isNaN(Number(r.master))) {
+      const masterById = masters.find(m => String(m.id) === String(r.master));
+      if (masterById) {
+        masterDisplay = masterById.name;
+      }
+    } else if (r.master) {
+      // Если master - строка, используем как есть
+      masterDisplay = r.master;
+    }
+    return masterDisplay;
+  };
+
   return (
     <div>
-      <h2 className="page-title">Управление записями</h2>
+      <h2 className="page-title">Записи</h2>
 
-      <div className="panel filter-panel">
-        <div className="panel-body">
-          <div className="filter-grid">
-            <div>
+      <div className="filter-compact" ref={filterRef}>
+        <button 
+          className="btn filter-toggle"
+          onClick={() => setShowFilters(!showFilters)}
+          title="Показать/скрыть фильтры"
+        >
+          🔍 Фильтры
+        </button>
+        
+        {showFilters && (
+          <div className="filter-dropdown" onClick={(e) => e.stopPropagation()}>
+            <div className="filter-item">
               <label>Статус</label>
               <select value={status} onChange={e => setStatus(e.target.value)}>
                 <option value="all">Все статусы</option>
@@ -74,11 +112,11 @@ export default function RecordList({ records, onEdit, onDelete, onConfirm, users
                 <option value="cancelled">Отменено</option>
               </select>
             </div>
-            <div>
+            <div className="filter-item">
               <label>Дата</label>
               <input type="date" value={dateFilter} onChange={e => setDateFilter(e.target.value)} />
             </div>
-            <div>
+            <div className="filter-item">
               <label>Мастер</label>
               <select value={masterFilter} onChange={e => setMasterFilter(e.target.value)}>
                 <option value="all">Все мастера</option>
@@ -87,21 +125,12 @@ export default function RecordList({ records, onEdit, onDelete, onConfirm, users
                 ))}
               </select>
             </div>
-            <div className="apply-cell">
-              <button className="btn primary">Применить</button>
-            </div>
           </div>
-        </div>
+        )}
       </div>
 
       <div className="list-header">
         <h3>Активные записи ({filtered.length})</h3>
-        <div className="filters">
-          <button className={`btn ${status === 'all' ? 'active' : ''}`} onClick={() => setStatus('all')}>Все</button>
-          <button className={`btn ${status === 'in-progress' ? 'active' : ''}`} onClick={() => setStatus('in-progress')}>В работе</button>
-          <button className={`btn ${status === 'completed' ? 'active' : ''}`} onClick={() => setStatus('completed')}>Выполнено</button>
-          <button className={`btn ${status === 'cancelled' ? 'active' : ''}`} onClick={() => setStatus('cancelled')}>Отменено</button>
-        </div>
       </div>
 
       {filtered.length === 0 ? (
@@ -112,6 +141,7 @@ export default function RecordList({ records, onEdit, onDelete, onConfirm, users
         filtered.map((r) => {
           const clientDisplay = resolveClient(r);
           const serviceDisplay = resolveService(r);
+          const masterDisplay = resolveMaster(r);
 
           return (
             <Card
@@ -119,6 +149,7 @@ export default function RecordList({ records, onEdit, onDelete, onConfirm, users
               {...r}
               client={clientDisplay}
               service={serviceDisplay}
+              master={masterDisplay}
               onEdit={onEdit}
               onDelete={onDelete}
               onConfirm={onConfirm}

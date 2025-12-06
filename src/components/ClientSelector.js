@@ -9,6 +9,7 @@ export default function ClientSelector({
   const [inputValue, setInputValue] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
   const [filteredClients, setFilteredClients] = useState([]);
+  const [isFocused, setIsFocused] = useState(false);
 
   useEffect(() => {
     setInputValue(value || '');
@@ -41,11 +42,13 @@ export default function ClientSelector({
 
   const handleFocus = () => {
     setShowDropdown(true);
+    setIsFocused(true);
   };
 
   const handleBlur = () => {
     // Задержка для обработки клика по элементу выпадающего списка
     setTimeout(() => setShowDropdown(false), 0);
+    setIsFocused(false);
   };
 
   return (
@@ -78,7 +81,7 @@ export default function ClientSelector({
           </div>
         )}
       </div>
-      {(inputValue || '').toString() && !clients.some(c => c.name.toLowerCase() === (inputValue || '').toString().toLowerCase()) && (
+      {!isFocused && (inputValue || '').toString() && !clients.some(c => c.name.toLowerCase() === (inputValue || '').toString().toLowerCase()) && (
         <div className="new-client-hint">
           💡 Будет создан новый клиент: "{inputValue}"
         </div>

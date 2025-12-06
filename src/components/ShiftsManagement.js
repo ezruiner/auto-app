@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { getOperators, getShifts, openShift, closeShift, getCurrentShift, cleanupOrphanedShifts, updateShift, reopenShift, addMinutesToDate } from '../store/dataStore';
 import Modal from './Modal';
 
@@ -15,6 +15,8 @@ export default function ShiftsManagement() {
   const [operatorFilter, setOperatorFilter] = useState('all');
   const [dateStart, setDateStart] = useState('');
   const [dateEnd, setDateEnd] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
+  const filterRef = useRef(null);
 
   useEffect(() => {
     // Clean up any orphaned shifts on component load
@@ -23,8 +25,29 @@ export default function ShiftsManagement() {
     setShifts(getShifts());
   }, []);
 
+  // Закрытие фильтра при клике вне окна
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (filterRef.current && !filterRef.current.contains(event.target)) {
+        setShowFilters(false);
+      }
+    };
+
+    if (showFilters) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [showFilters]);
+
   const handleOpenShift = (operatorId) => {
     const operator = operators.find(o => o.id === operatorId);
+    
+    // Проверка существования оператора
+    if (!operator) {
+      alert('Ошибка: Оператор не существует. Возможно, он был удалён или его роль была изменена.');
+      return;
+    }
+
     const currentShift = getCurrentShift(operatorId);
 
     if (currentShift) {
@@ -91,6 +114,12 @@ export default function ShiftsManagement() {
 
   const handleSaveEdit = () => {
     if (!editShiftData) return;
+
+    // Валидация времени смены
+    if (editClosedAt && new Date(editOpenedAt) >= new Date(editClosedAt)) {
+      alert('Время начала смены не может быть больше или равно времени окончания!');
+      return;
+    }
 
     const updates = {
       openedAt: editOpenedAt,
@@ -188,10 +217,18 @@ export default function ShiftsManagement() {
         <div className="panel stat-card"><div className="panel-body"><div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Всего операций</div><div style={{ fontSize: '24px', fontWeight: 700 }}>{stats.operations}</div></div></div>
       </div>
 
-      <div className="panel filter-panel" role="region" aria-label="Фильтрация смен">
-        <div className="panel-body">
-          <div className="filter-grid">
-            <div>
+      <div className="filter-compact" ref={filterRef}>
+        <button 
+          className="btn filter-toggle"
+          onClick={() => setShowFilters(!showFilters)}
+          title="Показать/скрыть фильтры"
+        >
+          🔍 Фильтры
+        </button>
+        
+        {showFilters && (
+          <div className="filter-dropdown" onClick={(e) => e.stopPropagation()}>
+            <div className="filter-item">
               <label>Оператор</label>
               <select 
                 className="filter-select" 
@@ -205,7 +242,7 @@ export default function ShiftsManagement() {
                 ))}
               </select>
             </div>
-            <div>
+            <div className="filter-item">
               <label>Дата начала</label>
               <input 
                 type="date" 
@@ -215,7 +252,7 @@ export default function ShiftsManagement() {
                 aria-label="Дата начала"
               />
             </div>
-            <div>
+            <div className="filter-item">
               <label>Дата окончания</label>
               <input 
                 type="date" 
@@ -225,11 +262,8 @@ export default function ShiftsManagement() {
                 aria-label="Дата окончания"
               />
             </div>
-            <div className="apply-cell">
-              <button className="btn primary" aria-label="Применить фильтры">Применить</button>
-            </div>
           </div>
-        </div>
+        )}
       </div>
 
       <div style={{ marginBottom: '24px' }}>
@@ -334,13 +368,27 @@ export default function ShiftsManagement() {
                           🔴 Закрыть
                         </button>
                       ) : (
-                        <button
-                          className="btn primary small"
-                          onClick={() => handleEditShift(shift)}
-                          style={{ padding: '4px 8px', fontSize: '12px' }}
-                        >
-                          Изменить
-                        </button>
+                        <>
+                          {/* Проверяем, есть ли более новая смена для этого оператора */}
+                          {shifts.some(s => s.operatorId === operator?.id && new Date(s.openedAt) > new Date(shift.openedAt)) ? (
+                            <button
+                              className="btn disabled small"
+                              disabled
+                              style={{ padding: '4px 8px', fontSize: '12px', opacity: 0.5, cursor: 'not-allowed' }}
+                              title="Нельзя редактировать закрытую смену, если есть более новая смена"
+                            >
+                              Заблокирована
+                            </button>
+                          ) : (
+                            <button
+                              className="btn primary small"
+                              onClick={() => handleEditShift(shift)}
+                              style={{ padding: '4px 8px', fontSize: '12px' }}
+                            >
+                              Изменить
+                            </button>
+                          )}
+                        </>
                       )}
                     </td>
                   </tr>
@@ -369,13 +417,27 @@ export default function ShiftsManagement() {
                       🔴 Закрыть
                     </button>
                   ) : (
-                    <button
-                      className="btn primary small"
-                      onClick={() => handleEditShift(shift)}
-                      style={{ padding: '4px 8px', fontSize: '12px' }}
-                    >
-                      Изменить
-                    </button>
+                    <>
+                      {/* Проверяем, есть ли более новая смена для этого оператора */}
+                      {shifts.some(s => s.operatorId === operator?.id && new Date(s.openedAt) > new Date(shift.openedAt)) ? (
+                        <button
+                          className="btn disabled small"
+                          disabled
+                          style={{ padding: '4px 8px', fontSize: '12px', opacity: 0.5, cursor: 'not-allowed' }}
+                          title="Нельзя редактировать закрытую смену, если есть более новая смена"
+                        >
+                          Заблокирована
+                        </button>
+                      ) : (
+                        <button
+                          className="btn primary small"
+                          onClick={() => handleEditShift(shift)}
+                          style={{ padding: '4px 8px', fontSize: '12px' }}
+                        >
+                          Изменить
+                        </button>
+                      )}
+                    </>
                   )}
                 </div>
                 <div className="detail-row">

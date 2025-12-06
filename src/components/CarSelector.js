@@ -9,6 +9,7 @@ export default function CarSelector({
   const [inputValue, setInputValue] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
   const [carHistory, setCarHistory] = useState([]);
+  const [isFocused, setIsFocused] = useState(false);
 
   useEffect(() => {
     setInputValue(value || '');
@@ -36,6 +37,7 @@ export default function CarSelector({
 
   const handleInputBlur = () => {
     setTimeout(() => setShowDropdown(false), 0);
+    setIsFocused(false);
     // Логика добавления в историю перенесена в формы для добавления только при успешном сохранении
   };
 
@@ -56,6 +58,7 @@ export default function CarSelector({
 
   const handleFocus = () => {
     setShowDropdown(true);
+    setIsFocused(true);
   };
 
   return (
@@ -73,6 +76,7 @@ export default function CarSelector({
           placeholder="Введите марку и модель автомобиля"
           required={required}
           className="car-input"
+          autoComplete="off"
         />
         {showDropdown && filteredCars.length > 0 && (
           <div className="car-dropdown">
@@ -108,7 +112,7 @@ export default function CarSelector({
           </div>
         )}
       </div>
-      {inputValue && !carHistory.some(c => c.toLowerCase() === inputValue.toLowerCase()) && (
+      {!isFocused && inputValue && !carHistory.some(c => c.toLowerCase() === inputValue.toLowerCase()) && (
         <div className="new-car-hint">
           💡 Будет добавлен в историю: "{inputValue}"
         </div>
