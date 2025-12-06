@@ -1,8 +1,30 @@
+import React from 'react';
 import { render, screen } from '@testing-library/react';
 import App from './App';
 
-test('renders learn react link', () => {
+jest.mock('react-router-dom', () => ({
+  BrowserRouter: ({ children }) => <div>{children}</div>,
+  Routes: ({ children }) => <div>{children}</div>,
+  Route: ({ element }) => element,
+  Link: ({ children }) => <a>{children}</a>,
+  useLocation: () => ({ pathname: '/' }),
+}), { virtual: true });
+
+beforeAll(() => {
+  if (!window.matchMedia) {
+    window.matchMedia = () => ({
+      matches: false,
+      addListener: () => {},
+      removeListener: () => {},
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      dispatchEvent: () => false,
+      media: '(prefers-color-scheme: dark)'
+    });
+  }
+});
+
+test('рендерится навигация с разделом "Записи"', () => {
   render(<App />);
-  const linkElement = screen.getByText(/learn react/i);
-  expect(linkElement).toBeInTheDocument();
+  expect(screen.getByText('Записи')).toBeInTheDocument();
 });

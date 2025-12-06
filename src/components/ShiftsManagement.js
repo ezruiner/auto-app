@@ -12,6 +12,9 @@ export default function ShiftsManagement() {
   const [editOpenedAt, setEditOpenedAt] = useState('');
   const [editClosedAt, setEditClosedAt] = useState('');
   const [editNotes, setEditNotes] = useState('');
+  const [operatorFilter, setOperatorFilter] = useState('all');
+  const [dateStart, setDateStart] = useState('');
+  const [dateEnd, setDateEnd] = useState('');
 
   useEffect(() => {
     // Clean up any orphaned shifts on component load
@@ -71,6 +74,11 @@ export default function ShiftsManagement() {
     const hours = Math.floor(duration / 60);
     const minutes = duration % 60;
     return `${hours}ч ${minutes}м`;
+  };
+
+  const durationMinutes = (openedAt, closedAt) => {
+    if (!closedAt) return 0;
+    return Math.max(0, Math.round((new Date(closedAt) - new Date(openedAt)) / 60000));
   };
 
   const handleEditShift = (shift) => {
@@ -148,9 +156,81 @@ export default function ShiftsManagement() {
     return localDate.toISOString().slice(0, 16);
   };
 
+  const inRange = (dateStr) => {
+    const d = new Date(dateStr);
+    const startOk = !dateStart || d >= new Date(dateStart);
+    const endOk = !dateEnd || d <= new Date(dateEnd);
+    return startOk && endOk;
+  };
+
+  const filteredShifts = shifts.filter(s => {
+    const operatorOk = operatorFilter === 'all' ? true : String(s.operatorId) === String(operatorFilter);
+    const rangeOk = inRange(s.openedAt);
+    return operatorOk && rangeOk;
+  });
+
+  const stats = (() => {
+    const total = shifts.length;
+    const active = shifts.filter(s => !s.closedAt).length;
+    const totalMinutes = shifts.reduce((acc, s) => acc + durationMinutes(s.openedAt, s.closedAt), 0);
+    const hours = Math.floor(totalMinutes / 60);
+    return { total, active, hours, operations: shifts.length };
+  })();
+
   return (
     <div>
-      <h2>Управление сменами</h2>
+      <h2 className="page-title">Управление сменами</h2>
+
+      <div className="stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '12px', marginBottom: '16px' }}>
+        <div className="panel stat-card"><div className="panel-body"><div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Всего смен</div><div style={{ fontSize: '24px', fontWeight: 700 }}>{stats.total}</div></div></div>
+        <div className="panel stat-card"><div className="panel-body"><div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Активных смен</div><div style={{ fontSize: '24px', fontWeight: 700 }}>{stats.active}</div></div></div>
+        <div className="panel stat-card"><div className="panel-body"><div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Отработано часов</div><div style={{ fontSize: '24px', fontWeight: 700 }}>{stats.hours}</div></div></div>
+        <div className="panel stat-card"><div className="panel-body"><div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Всего операций</div><div style={{ fontSize: '24px', fontWeight: 700 }}>{stats.operations}</div></div></div>
+      </div>
+
+      <div className="panel filter-panel" role="region" aria-label="Фильтрация смен">
+        <div className="panel-body">
+          <div className="filter-grid">
+            <div>
+              <label>Оператор</label>
+              <select 
+                className="filter-select" 
+                value={operatorFilter} 
+                onChange={e => setOperatorFilter(e.target.value)}
+                aria-label="Фильтр по оператору"
+              >
+                <option value="all">Все операторы</option>
+                {operators.map(o => (
+                  <option key={o.id} value={o.id}>{o.name}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label>Дата начала</label>
+              <input 
+                type="date" 
+                className="filter-input" 
+                value={dateStart} 
+                onChange={e => setDateStart(e.target.value)} 
+                aria-label="Дата начала"
+              />
+            </div>
+            <div>
+              <label>Дата окончания</label>
+              <input 
+                type="date" 
+                className="filter-input" 
+                value={dateEnd} 
+                onChange={e => setDateEnd(e.target.value)} 
+                aria-label="Дата окончания"
+              />
+            </div>
+            <div className="apply-cell">
+              <button className="btn primary" aria-label="Применить фильтры">Применить</button>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <div style={{ marginBottom: '24px' }}>
         <h3>Операторы</h3>
@@ -205,7 +285,7 @@ export default function ShiftsManagement() {
               </tr>
             </thead>
             <tbody>
-              {shifts.slice().reverse().map(shift => {
+              {filteredShifts.slice().reverse().map(shift => {
                 const operator = operators.find(o => o.id === shift.operatorId);
                 const isOpen = !shift.closedAt;
 
@@ -272,7 +352,7 @@ export default function ShiftsManagement() {
 
         {/* Mobile card view */}
         <div className="shifts-history-cards">
-          {shifts.slice().reverse().map(shift => {
+          {filteredShifts.slice().reverse().map(shift => {
             const operator = operators.find(o => o.id === shift.operatorId);
             const isOpen = !shift.closedAt;
 

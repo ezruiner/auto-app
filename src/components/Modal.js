@@ -1,7 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 
-export default function Modal({ title, children, onCancel, onConfirm, confirmLabel = 'OK', disabled = false }) {
+export default function Modal({ title, children, onCancel, onConfirm, confirmLabel = 'OK', disabled = false, confirmDisabledHint }) {
   const [isClosing, setIsClosing] = useState(false);
+  const overlayRef = useRef(null);
+  const modalRef = useRef(null);
 
   // Обработчик нажатия Escape
   useEffect(() => {
@@ -13,6 +16,25 @@ export default function Modal({ title, children, onCancel, onConfirm, confirmLab
 
     document.addEventListener('keydown', handleEscape);
     return () => document.removeEventListener('keydown', handleEscape);
+  }, []);
+
+  useEffect(() => {
+    const overlay = overlayRef.current;
+    const modalEl = modalRef.current;
+    if (overlay) {
+      const cs = window.getComputedStyle(overlay);
+      if (cs.display === 'none' || cs.visibility === 'hidden' || Number(cs.opacity) === 0) {
+        overlay.style.display = 'flex';
+        overlay.style.visibility = 'visible';
+        overlay.style.opacity = '1';
+        overlay.style.zIndex = '4000';
+        overlay.style.pointerEvents = 'auto';
+      }
+    }
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = '';
+    };
   }, []);
 
   // Функция закрытия с анимацией
@@ -50,18 +72,28 @@ export default function Modal({ title, children, onCancel, onConfirm, confirmLab
     }
   };
 
-  return (
-    <div className={`modal-overlay ${isClosing ? 'closing' : ''}`} onClick={handleOverlayClick}>
-      <div className="modal">
+  return createPortal(
+    <div ref={overlayRef} className={`modal-overlay ${isClosing ? 'closing' : ''}`} onClick={handleOverlayClick}>
+      <div ref={modalRef} className="modal" role="dialog" aria-modal="true">
         <div className="modal-header">
           <h3>{title}</h3>
         </div>
         <div className="modal-body">{children}</div>
         <div className="modal-actions">
           <button className="btn" onClick={handleClose}>Отмена</button>
-          {onConfirm && <button className="btn primary" onClick={handleConfirm} disabled={disabled}>{confirmLabel}</button>}
+          {onConfirm && (
+            <button
+              className="btn primary"
+              onClick={handleConfirm}
+              disabled={disabled}
+              title={disabled && confirmDisabledHint ? confirmDisabledHint : undefined}
+            >
+              {confirmLabel}
+            </button>
+          )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

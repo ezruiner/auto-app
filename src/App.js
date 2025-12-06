@@ -9,18 +9,24 @@ import DeleteForm from './components/DeleteForm';
 import ConfirmForm from './components/ConfirmForm';
 import ThemeToggle from './components/ThemeToggle';
 import AdminPanel from './components/AdminPanel';
+import ShiftsManagement from './components/ShiftsManagement';
+import ServicesManagement from './components/ServicesManagement';
+import UsersManagement from './components/UsersManagement';
 import { getRecordCards } from './service/api';
 import { getUsers, getServices, getMasters, addCarToHistory } from './store/dataStore';
 
-function Navigation({ onOpenCreate, onToggleDisco, discoMode, showDiscoButton, isMobile }) {
+function Navigation({ onOpenCreate, onToggleDisco, discoMode, showDiscoButton }) {
   return (
     <nav>
       <div className="nav-left">
-        <Link to="/records" className="btn">📋 Список записей</Link>
-        <button className="btn" onClick={() => onOpenCreate()}>➕ Создать запись</button>
-        <Link to="/admin" className="btn">⚙️ Администратор</Link>
+        <Link to="/" className="brand">🛠️ Автосервис Pro</Link>
+        <Link to="/records" className="btn">Записи</Link>
+        <Link to="/services" className="btn">Услуги</Link>
+        <Link to="/users" className="btn">Пользователи</Link>
+        <Link to="/shifts" className="btn">Смены</Link>
       </div>
       <div className="nav-right">
+        <button className="btn primary" onClick={() => onOpenCreate()}>+ Добавить запись</button>
         {showDiscoButton && <button className="btn" onClick={onToggleDisco}>{discoMode ? '🎉 Диско ВКЛ' : '🎈 Диско'}</button>}
         <ThemeToggle />
       </div>
@@ -326,7 +332,6 @@ function App() {
           onToggleDisco={() => setDiscoMode(!discoMode)} 
           discoMode={discoMode} 
           showDiscoButton={!isMobile && showDiscoButton} 
-          isMobile={isMobile} 
         />
 
         {isMobile && (
@@ -371,6 +376,9 @@ function App() {
               )}
             </div>
           } />
+          <Route path="/services" element={<ServicesManagement />} />
+          <Route path="/users" element={<UsersManagement />} />
+          <Route path="/shifts" element={<ShiftsManagement />} />
           <Route path="/admin" element={<AdminPanel />} />
         </Routes>
 
@@ -381,31 +389,32 @@ function App() {
 
         {modal && modal.type === 'edit' && (
           <Modal title="Редактировать запись" onCancel={closeModal} onConfirm={() => handleModalConfirm(modal.formData)} confirmLabel="Сохранить">
-            <EditForm initial={modal.record} onChange={(fd) => { modal.formData = fd; }} />
+            <EditForm initial={modal.record} onChange={(fd) => { setModal(prev => (prev ? { ...prev, formData: fd } : prev)); }} />
           </Modal>
         )}
 
         {modal && modal.type === 'delete' && (
-          <Modal 
-            title="Причина удаления" 
-            onCancel={closeModal} 
-            onConfirm={() => handleModalConfirm(modal.formData)} 
+          <Modal
+            title="Причина удаления"
+            onCancel={closeModal}
+            onConfirm={() => handleModalConfirm(modal.formData)}
             confirmLabel="Удалить"
-            disabled={!modal.formData?.reason?.trim() || !modal.formData}
+            disabled={!(modal?.formData?.reason && modal.formData.reason.trim().length > 0)}
+            confirmDisabledHint="Причина должна быть непустой и не состоять только из пробелов"
           >
-            <DeleteForm initial={modal.record} onChange={(fd) => { modal.formData = fd; }} />
+            <DeleteForm initial={modal.record} onChange={(fd) => { setModal(prev => (prev ? { ...prev, formData: fd } : prev)); }} />
           </Modal>
         )}
 
         {modal && modal.type === 'confirm' && (
           <Modal title="Подтверждение оплаты" onCancel={closeModal} onConfirm={() => handleModalConfirm(modal.formData)} confirmLabel="Подтвердить">
-            <ConfirmForm initial={modal.record} onChange={(fd) => { modal.formData = fd; }} />
+            <ConfirmForm initial={modal.record} onChange={(fd) => { setModal(prev => (prev ? { ...prev, formData: fd } : prev)); }} />
           </Modal>
         )}
 
         {modal && modal.type === 'create' && (
           <Modal title="Создать запись" onCancel={closeModal} onConfirm={() => handleModalConfirm(modal.formData)} confirmLabel="Создать">
-            <RecordForm onChange={(fd) => { modal.formData = fd; }} />
+            <RecordForm onChange={(fd) => { setModal(prev => (prev ? { ...prev, formData: fd } : prev)); }} />
           </Modal>
         )}
       </div>

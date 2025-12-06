@@ -11,6 +11,8 @@ export default function UsersManagement() {
     role: 'client',
     services: []
   });
+  const [search, setSearch] = useState('');
+  const [roleFilter, setRoleFilter] = useState('all');
 
   useEffect(() => {
     setUsers(getUsers());
@@ -59,11 +61,64 @@ export default function UsersManagement() {
     return roles[role] || role;
   };
 
+  const total = users.length;
+  const operators = users.filter(u => u.role === 'operator').length;
+  const masters = users.filter(u => u.role === 'master').length;
+  const clients = users.filter(u => u.role === 'client').length;
+
+  const filteredUsers = users.filter(u => {
+    const roleOk = roleFilter === 'all' ? true : u.role === roleFilter;
+    const searchOk = (u.name || '').toLowerCase().includes(search.toLowerCase());
+    return roleOk && searchOk;
+  });
+
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-        <h2>Пользователи</h2>
+        <h2>Управление пользователями</h2>
         <button className="btn primary" onClick={handleAdd}>+ Добавить пользователя</button>
+      </div>
+
+      <div className="stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '12px', marginBottom: '16px' }}>
+        <div className="panel stat-card"><div className="panel-body"><div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Всего пользователей</div><div style={{ fontSize: '24px', fontWeight: 700 }}>{total}</div></div></div>
+        <div className="panel stat-card"><div className="panel-body"><div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Операторов</div><div style={{ fontSize: '24px', fontWeight: 700 }}>{operators}</div></div></div>
+        <div className="panel stat-card"><div className="panel-body"><div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Мастеров</div><div style={{ fontSize: '24px', fontWeight: 700 }}>{masters}</div></div></div>
+        <div className="panel stat-card"><div className="panel-body"><div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Клиентов</div><div style={{ fontSize: '24px', fontWeight: 700 }}>{clients}</div></div></div>
+      </div>
+
+      <div className="panel filter-panel" role="region" aria-label="Фильтрация пользователей">
+        <div className="panel-body">
+          <div className="filter-grid">
+            <div>
+              <label>Поиск</label>
+              <input 
+                className="filter-input" 
+                value={search} 
+                onChange={e => setSearch(e.target.value)} 
+                placeholder="Поиск по имени" 
+                aria-label="Поиск по имени пользователя" 
+                role="searchbox"
+              />
+            </div>
+            <div>
+              <label>Роль</label>
+              <select 
+                className="filter-select" 
+                value={roleFilter} 
+                onChange={e => setRoleFilter(e.target.value)}
+                aria-label="Фильтр по роли"
+              >
+                <option value="all">Все роли</option>
+                <option value="operator">Оператор</option>
+                <option value="master">Мастер</option>
+                <option value="client">Клиент</option>
+              </select>
+            </div>
+            <div className="apply-cell">
+              <button className="btn primary" aria-label="Применить фильтры">Применить</button>
+            </div>
+          </div>
+        </div>
       </div>
 
       <table style={{ width: '100%', borderCollapse: 'collapse' }}>
@@ -76,7 +131,7 @@ export default function UsersManagement() {
           </tr>
         </thead>
         <tbody>
-          {users.map(user => {
+          {filteredUsers.map(user => {
             const userServices = services.filter(s => user.services?.includes(s.id));
             return (
               <tr key={user.id} style={{ borderBottom: '1px solid var(--border-color)' }}>

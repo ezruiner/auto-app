@@ -11,23 +11,28 @@ export default function Card({ id, client, car, service, price, date, payment_st
 
   let icon = '⏳';
   let cls = 'in-progress';
+  let statusLabel = 'В РАБОТЕ';
 
   if (status === 'cancelled' || status === 'canceled' || status === 'cancel' || status === 'отмена') {
     icon = '✕';
     cls = 'cancelled';
+    statusLabel = 'ОТМЕНЕНО';
   } else if (status === 'completed' || status === 'done' || status === 'проведена') {
     icon = '✓';
     cls = 'completed';
+    statusLabel = 'ВЫПОЛНЕНО';
   } else {
     // default: in progress / pending
     icon = '⏳';
     cls = 'in-progress';
+    statusLabel = 'В РАБОТЕ';
   }
 
   return (
     <div className={`card ${cls}`}>
       <div className="status">
         <span className={`status-icon ${cls}`}>{icon}</span>
+        <span className={`status-badge ${cls}`}>{statusLabel}</span>
       </div>
       <div className="desc">
         <p className="client">{client}</p>
@@ -49,14 +54,14 @@ export default function Card({ id, client, car, service, price, date, payment_st
         )}
       </div>
       <div className="card-actions">
-        <button className="btn btn.small" onClick={() => onEdit && onEdit(id)}>✏️ Редактировать</button>
+        <button className="btn small" onClick={() => onEdit && onEdit(id)}>✏️ Редактировать</button>
         <button
-          className="btn btn.small danger"
+          className="btn small danger"
           onClick={() => onDelete && onDelete(id)}
           disabled={cls === 'cancelled'}
         >🗑️ Удалить</button>
         <button
-          className="btn btn.small primary"
+          className="btn small primary"
           onClick={() => onConfirm && onConfirm(id)}
           disabled={cls !== 'in-progress'}
         >✓ Подтвердить</button>
